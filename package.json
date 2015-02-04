@@ -1,0 +1,46 @@
+{
+  "name": "cosjs",
+  "description": "webgame server framework",
+  "version": "0.1.16",
+  "main": "./index.js",
+  "author": {
+    "name": "wanchao.huang",
+    "email": "hwclegend@163.com"
+  },
+  "keywords": [
+    "web",
+    "game",
+    "server",
+    "framework"
+  ],
+  "licenses": [
+    {
+      "type": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "redis": ">=0.12.1",
+    "mongodb": ">=1.4.19"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "directories": {
+    "lib": "./lib/"
+  },
+  "repository": {
+    "type": "https",
+    "url": "https://git.oschina.net/xcoole/cosjs.git"
+  },
+  "bugs": {
+    "url": "http://git.oschina.net/xcoole/cosjs/issues"
+  },
+  "homepage": "http://git.oschina.net/xcoole/cosjs",
+  "readme": "cosjs - a node.js web server\r\n===========================\r\n\r\nThis is a  web server for node.js.  easy to create web or mobile game server.\r\n\r\n\r\nInstall with:\r\n\r\n    npm install cosjs\r\n\r\n## Usage\r\n\r\nSimple example, included as `test/index.js`:\r\n\r\n```js\r\n    var cosjs = require(\"cosjs\");\r\n    var server = new cosjs.http();\r\n    server.start(80);\r\n```\r\n\r\n\r\n",
+  "readmeFilename": "README.md",
+  "_id": "cosjs@0.1.16",
+  "scripts": {},
+  "_shasum": "4e2c91cb8bbc2180f96ef4076e96924d835d25b3",
+  "_from": "cosjs@"
+}

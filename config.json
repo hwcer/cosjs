@@ -1,0 +1,13 @@
+{
+  "root":"./",
+  "api":"api",
+  "config":"config",
+  "static":"wwwroot",
+  "share": {},
+  "post":true,
+  "debug": 0,
+  "workers": 0,
+  "msgid":false,
+  "charset":"utf-8",
+  "trust":[]
+}

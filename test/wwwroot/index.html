@@ -1,0 +1,27 @@
+
+cosjs - a node.js web server<br>
+===========================<br><br>
+
+This is a  web server for node.js.  easy to create web or mobile game server.<br><br><br>
+
+
+Install with:<br><br>
+
+npm install cosjs<br><br>
+
+## Usage<br><br>
+
+Simple example, included as `test/index.js`:<br><br>
+
+```js<br>
+var cosjs = require("cosjs");<br>
+var server = new cosjs.http();<br>
+server.start(80);<br>
+```<br>
+
+===============静态服务器============<br><br>
+默认静态路径：<a href="1.png">$root/wwwroot/1.png<br>
+<img src="1.png" /><br></a>
+
+server.router('/images/',function)静态文件路由后的地址：<a href="images/1.png">$root/images/1.png<br>
+<img src="images/1.png" /><br></a>
