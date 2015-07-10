@@ -1,7 +1,7 @@
 {
   "name": "cosjs",
   "description": "webgame server framework",
-  "version": "0.1.16",
+  "version": "0.1.18",
   "main": "./index.js",
   "author": {
     "name": "wanchao.huang",
@@ -36,11 +36,5 @@
   "bugs": {
     "url": "http://git.oschina.net/xcoole/cosjs/issues"
   },
-  "homepage": "http://git.oschina.net/xcoole/cosjs",
-  "readme": "cosjs - a node.js web server\r\n===========================\r\n\r\nThis is a  web server for node.js.  easy to create web or mobile game server.\r\n\r\n\r\nInstall with:\r\n\r\n    npm install cosjs\r\n\r\n## Usage\r\n\r\nSimple example, included as `test/index.js`:\r\n\r\n```js\r\n    var cosjs = require(\"cosjs\");\r\n    var server = new cosjs.http();\r\n    server.start(80);\r\n```\r\n\r\n\r\n",
-  "readmeFilename": "README.md",
-  "_id": "cosjs@0.1.16",
-  "scripts": {},
-  "_shasum": "4e2c91cb8bbc2180f96ef4076e96924d835d25b3",
-  "_from": "cosjs@"
+  "homepage": "http://git.oschina.net/xcoole/cosjs"
 }

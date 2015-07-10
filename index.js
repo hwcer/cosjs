@@ -1,65 +1,36 @@
-require('./lib/global');
+//全局函数
+require('./lib/cosjs');
+//全局配置
+
 var config = require('./config');
 
-exports.http = function () {
-    var server  = require('./lib/server').create();
-
-    this.set = function(key,val){
-        this.config(key,val);
-    }
-
-    this.config = function(key,val){
-        if(typeof key =='object'){
-            for(var k in key){
-                config[k] = key[k];
-            }
-        }
-        else{
-            config[key] = val;
+var merge = function(source,key,val){
+    if(typeof val == 'object'){
+        for(var k in val){
+            source[key][k] = val[k];
         }
     }
-
-    this.router = function(reg,api){
-        var router  = require('./lib/router');
-        router.set(reg,api);
+    else{
+        source[key] = val;
     }
+}
 
-    this.cookie = function(key,val){
-        var cookie = require('./lib/cookie').config;
-        if(typeof key =='object'){
-            for(var k in key){
-                cookie[k] = key[k];
-            }
-        }
-        else{
-            cookie[key] = val;
-        }
+
+exports.set = function(key,val){
+    if(key.indexOf('.')<0){
+        return merge(config,key,val);
     }
-
-    this.session = function(key,val){
-        var session = require('./lib/session').config;
-        if(typeof key =='object'){
-            for(var k in key){
-                session[k] = key[k];
-            }
-        }
-        else{
-            session[key] = val;
-        }
+    else{
+        var arr = key.split('.');
+        return merge(config[arr[0]],arr[1],val);
     }
-
-    this.msgPack = function(fun){
-        server.msgPack = fun;
-    }
-    this.apiPack = function(fun){
-        server.apiPack = fun;
-    };
-
-    this.start = server.start;
-
 }
 
 
 
+exports.fork = require('./lib/fork').set;
 
 
+exports.http = function () {
+    return require('./lib/http').create();
+}

@@ -1,13 +1,31 @@
-{
-  "root":"./",
-  "api":"api",
-  "config":"config",
-  "static":"wwwroot",
-  "share": {},
-  "post":true,
-  "debug": 0,
-  "workers": 0,
-  "msgid":false,
-  "charset":"utf-8",
-  "trust":[]
+{  
+	"root" : "",
+    "share" :"share",
+
+	"http":{
+		"port" : 80,
+		"post":false,
+		"jsonp":null,
+		"output" :"html",
+		"workers": 0,
+		"charset":"utf-8"
+	},
+
+  	"cookie":{
+		"key" :null,
+		"secret":"cosjs",
+		"expires":0,
+		"path":"/",
+		"domain":null,
+		"httpOnly":false
+	},
+
+	"session":{
+		"id" :"$id",
+		"lock" : false,
+		"dtype" : "redis",
+		"dbase":null,
+		"secret":"cosjs",
+		"expires":0
+	}
 }
