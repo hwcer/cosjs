@@ -1,7 +1,7 @@
 {  
 	"root" : "",
     "share" :"share",
-
+	"secret":"",	
 	"http":{
 		"port" : 80,
 		"post":false,
@@ -12,8 +12,7 @@
 	},
 
   	"cookie":{
-		"key" :null,
-		"secret":"cosjs",
+		"key" : null,
 		"expires":0,
 		"path":"/",
 		"domain":null,
@@ -25,7 +24,6 @@
 		"lock" : false,
 		"dtype" : "redis",
 		"dbase":null,
-		"secret":"cosjs",
 		"expires":0
 	}
 }

@@ -3,9 +3,14 @@ require('./lib/cosjs');
 //全局配置
 
 var config = require('./config');
+//随机密匙
+config['secret'] = Math.random().toString();
 
 var merge = function(source,key,val){
     if(typeof val == 'object'){
+		if(!source[key]){
+			source[key] = {};
+		}
         for(var k in val){
             source[key][k] = val[k];
         }
