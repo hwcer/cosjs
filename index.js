@@ -1,41 +1,13 @@
 //全局函数
 require('./lib/cosjs');
+var http = require('./lib/http');
+var fork = require('./lib/fork');
 //全局配置
-
 var config = require('./config');
-//随机密匙
-config['secret'] = Math.random().toString();
+var dataset = new $.dataset(config);
 
-var merge = function(source,key,val){
-    if(typeof val == 'object'){
-		if(!source[key]){
-			source[key] = {};
-		}
-        for(var k in val){
-            source[key][k] = val[k];
-        }
-    }
-    else{
-        source[key] = val;
-    }
-}
-
-
-exports.set = function(key,val){
-    if(key.indexOf('.')<0){
-        return merge(config,key,val);
-    }
-    else{
-        var arr = key.split('.');
-        return merge(config[arr[0]],arr[1],val);
-    }
-}
-
-
-
-exports.fork = require('./lib/fork').set;
-
-
-exports.http = function () {
-    return require('./lib/http').create();
-}
+exports.set = dataset.set;
+exports.http = http.create;
+exports.fork = fork.add;
+exports.start = fork.start;
+exports.config = config;

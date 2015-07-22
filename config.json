@@ -1,13 +1,12 @@
 {  
 	"root" : "",
     "share" :"share",
-	"secret":"",	
+	"secret":"cosjs",	
 	"http":{
 		"port" : 80,
 		"post":false,
 		"jsonp":null,
 		"output" :"html",
-		"workers": 0,
 		"charset":"utf-8"
 	},
 

@@ -8,6 +8,8 @@ var cosjs = require('../index');
 cosjs.set('root', __dirname);
 //共享目录，使用$.config,$.loader时默认到 root/share中找文件
 cosjs.set('share', 'share');
+//随机密匙,每次启动改变一次
+cosjs.set('secret', Math.random().toString()) ;   
 /********************http config*********************/
 //http 端口，默认：80
 cosjs.set("http.port",80);
@@ -29,8 +31,6 @@ cosjs.set("cookie.expires",0);
 /********************http session*********************/
 //session id 名称，
 cosjs.set("session.id","$id");
-//session 加密密匙
-cosjs.set("session.secret","hello cosjs");
 //session 有效期(秒)，默认：0  用不失效
 cosjs.set("session.expires",0);
 //session 用户级操作锁，开启操作锁后，同一时间一个用户（已经登录）只能有一个操作，默认：false
@@ -41,7 +41,7 @@ cosjs.set("session.dtype","redis");
 cosjs.set("session.dbase","127.0.0.1:6379");
 
 
-//fork一个进程
+//fork一个进程(测试)
 cosjs.fork(function(){
     console.log("this process will be exit for test");
     setTimeout(function(){
@@ -60,7 +60,10 @@ var serv = cosjs.http();
 serv.router('/api/','api/$2/$3');
 //所有静态资源定位到wwwroot目录
 serv.static('/', 'wwwroot');
-//启动服务器
-serv.start();
+//将HTTP服务器添加进群集子进程中（进程数量等于CPU核数，开发环境指定一个进程就可以）
+var httpWorks = require('os').cpus().length;
+cosjs.fork(serv.start,httpWorks);
+//启动群集所有子进程，此函数只能调用一次，必须将所有需要启动的进程都添加进群集（cosjs.fork）中之后统一启动
+cosjs.start();
 
-
+//*******群集启动后（cosjs.start）后面不要在执行任何代码，否则每个子进程都会执行一遍此处代码
