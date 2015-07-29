@@ -7,6 +7,8 @@
 		"post":false,
 		"jsonp":null,
 		"output" :"html",
+	  	"apiPack" : null,
+	  	"msgPack" : null,
 		"charset":"utf-8"
 	},
 
