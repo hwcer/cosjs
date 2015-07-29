@@ -19,8 +19,6 @@ cosjs.set("http.output","json");
 cosjs.set("http.jsonp",'jsoncb');
 //关闭POST数据
 cosjs.set("http.post",false);
-//启动worker进程数量，默认：0, CPU个数
-cosjs.set("http.workers",0);
 //输出格式,默认：utf-8
 cosjs.set("http.charset","utf-8");
 /********************http cookie*********************/
