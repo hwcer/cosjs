@@ -56,12 +56,8 @@ http.static('/', 'wwwroot');
 var cluster = cosjs.cluster;
 //按CPU个数启动http群集服务
 cluster.fork('http',http.start,require('os').cpus().length);
-//开启一个新进程
-cluster.fork('test',function(){
-    console.log(' I am a test work');
-});
-//开启远程管理模式,参数[端口,密码]
-cluster.manage(8080,'cosjs');
+//开启远程管理模式
+cluster.fork('manage', cosjs.library.loader('library/manage').start);
 //启动群集所有子进程，此函数只能调用一次，必须将所有需要启动的进程都添加进群集（cosjs.fork）中之后统一启动
 cluster.start();
 //*******群集启动后（cluster.start）后面不要在执行任何代码，否则每个子进程都会执行一遍此处代码
