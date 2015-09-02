@@ -145,6 +145,15 @@ var cosjs = function(){
             return req['cosjs']['session'].get(keys, callback);
         }
 
+        res["binary"] = function(name,data){
+            var arr = name.split('.');
+            var ContentType = res.type(name||'html');
+            res.set("Content-Type", ContentType);
+            res.set("Content-Length", data.length);
+            res.set("Content-Disposition", "attachment; filename=" + name);
+            res.send(data);
+        }
+
         res["callback"] = function(code,data,cache){
             var data = {"code":code,"data":data};
             if(cache){
