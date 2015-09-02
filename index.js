@@ -55,7 +55,7 @@ exports.mongo = function(config,dbName,collName,callback){
     }
 }
 
-//root,port
+//root,port,share,secret
 var cosjs = function(){
 
     var app = express();
@@ -70,12 +70,7 @@ var cosjs = function(){
 
     this.router = function(method,match,path){
         router[method](match, function(req,res,next){
-            if(typeof path == 'function'){
-                path(req,res,next);
-            }
-            else{
-                response(req,res,next,path);
-            }
+            response(req,res,next,path);
         });
     }
 
@@ -125,15 +120,7 @@ var cosjs = function(){
     }
 
     var response = function(req,res,next,path){
-        req['cosjs'] = {};
-        var  arr = req.path.split('/');
-        if(!arr[2]){
-            return next();
-        }
-        var root = app.get('root');
-        var path = [root,path||'',arr[1]].join('/');
-        var name = arr[2];
-        var api = require(path);
+        req['cosjs'] = {};      
         var getHeader = req['get'];
         req['get'] = function (key, type) {
             var val = req['query'][key] || req['params'][key] || null;
@@ -173,7 +160,15 @@ var cosjs = function(){
             res.jsonp(data);
         }
 
-        api[name](req,res);
+		if(typeof path == 'function'){
+			return path(req,res,next);
+		}else{
+			var root = app.get('root');
+			var file = [root,path||'',req.params[0]].join('/');
+			var name = req.params[1];
+			var api = require(file);
+			api[name](req,res);
+		}
     }
 }
 
