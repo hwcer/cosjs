@@ -1,17 +1,8 @@
 
-exports.test = function() {
-    var self = this;
+exports.login = function (req,res) {
+    var sid = req.get('sid','int');
+    var data = {"sid":sid,"name":"hwc","test":"abc"};
 
-    this.login = function () {
-        var uid = '10001';
-        var data = {"id":1,"name":"hwc","test":"abc"};
-        var cookie = self.cookie();
-        cookie.set(uid,data,self.callback);
-    };
-
-    this.logout = function () {
-        var cookie = self.cookie();
-        cookie.del(self.callback);
-    };
-
+    res.callback(null,data,111);
 }
+

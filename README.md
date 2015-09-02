@@ -14,8 +14,21 @@ Simple example, included as `test/index.js`:
 
 ```js
     var cosjs = require("cosjs");
-    var server = new cosjs.http();
-    server.start();
+    var app = cosjs();
+    app.set('port',80);
+	app.set('root',root);
+	app.set('secret',Math.random().toString());
+	app.set('views',root + '/view');
+	app.set('view engine','ejs');
+
+	app.static('wwwroot');
+	app.router('get','/open/*/*/','open');
+	app.router('get','/admin/*/*/','admin');
+	app.router('get','/service/*/*/','service');
+
+	var cluster = cosjs.cluster;
+	cluster.fork('http',app.start,require('os').cpus().length);
+	cluster.start();
 ```
 
 
