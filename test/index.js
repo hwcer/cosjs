@@ -18,7 +18,7 @@ app.set('msgPack',function(req,res,data){
 });
 
 app.static('wwwroot');
-app.router('get','/*/*/:sid/','api');
+app.router('all','/*/*/','api');
 
 //开启多进程
 var cluster = cosjs.cluster;

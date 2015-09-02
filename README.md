@@ -22,9 +22,7 @@ Simple example, included as `test/index.js`:
 	app.set('view engine','ejs');
 
 	app.static('wwwroot');
-	app.router('get','/open/*/*/','open');
-	app.router('get','/admin/*/*/','admin');
-	app.router('get','/service/*/*/','service');
+	app.router('all','/*/*/','api');
 
 	var cluster = cosjs.cluster;
 	cluster.fork('http',app.start,require('os').cpus().length);
