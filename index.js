@@ -57,15 +57,15 @@ exports.mongo = function(config,dbName,collName,callback){
 
 //root,port,share,secret
 var cosjs = function(){
-
     var app = express();
-
     var router = express.Router();
-
-    app.use(router);
 
     this.set = function(key,val){
         app.set(key,val);
+    }
+
+    this.use =function(k){
+        app.use(k);
     }
 
     this.router = function(method,match,path){
@@ -80,6 +80,7 @@ var cosjs = function(){
     }
 
     this.start = function(){
+        app.use(router);
         var port = app.get('port') || 80;
         app.listen(port);
     }
@@ -120,10 +121,17 @@ var cosjs = function(){
     }
 
     var response = function(req,res,next,path){
-        req['cosjs'] = {};      
         var getHeader = req['get'];
+        req['cosjs'] = {};
+        if(!req['body']){
+            req['body'] = {};
+        }
+
+        console.log(req['query']);
+        console.log(req['params']);
+        console.log(req['body']);
         req['get'] = function (key, type) {
-            var val = req['query'][key] || req['params'][key] || null;
+            var val = req['params'][key] || req['query'][key] || req['body'][key] || null;
             if (type && val !== null) {
                 val = exports.library.dataFormat(val, type);
             }
