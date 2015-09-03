@@ -126,10 +126,6 @@ var cosjs = function(){
         if(!req['body']){
             req['body'] = {};
         }
-
-        console.log(req['query']);
-        console.log(req['params']);
-        console.log(req['body']);
         req['get'] = function (key, type) {
             var val = req['params'][key] || req['query'][key] || req['body'][key] || null;
             if (type && val !== null) {
