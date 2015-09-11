@@ -1,100 +1,22 @@
-var express = require('express');
-var session = require('./lib/session');
+var session    = require('./lib/session');
 
-exports = module.exports = function(){
-    return new cosjs();
-}
-
-exports.task = require('./lib/task');
-
-exports.cluster = require('./lib/cluster');
-
-exports.dataset = require('./lib/dataset');
-
-exports.library = require('./lib/library');
-
-//config,format,callback
-exports.redis = function(config, type, callback){
-    if(typeof type == 'function'){
-        callback = type;
-        type = null;
-    }
-    else if(!callback){
-        callback = exports.library.callback;
-    }
-    var redis = require('./lib/redis');
-    if(type){
-        if(redis[type]){
-            var redis_conn_hash = new redis[type](config);
-            return callback(null, redis_conn_hash);
-        }
-        else{
-            throw new Error("exports.redis arguments[1] error");
-        }
-    }
-    else{
-        return redis.conn(config,callback);
-    }
-}
-
-exports.mongo = function(config,dbName,collName,callback){
-    if(typeof collName == 'function'){
-        callback = collName;
-        collName = null;
-    }
-    else if(!callback){
-        callback = exports.library.callback;
-    }
-    var mongo = require('./lib/mongo');
-    var length = arguments.length;
-    if(collName){
-        return callback(null,new mongo.coll(config,dbName,collName));
-    }
-    else{
-        return mongo.conn(config,dbName,callback );
-    }
+exports = module.exports = function(app){
+    return new cosjs(app);
 }
 
 //root,port,share,secret
-var cosjs = function(){
-    var app = express();
-    var router = express.Router();
-
-    this.set = function(key,val){
-        app.set(key,val);
-    }
-
-    this.use =function(k){
-        app.use(k);
-    }
-
-    this.router = function(method,match,path){
-        router[method](match, function(req,res,next){
-            response(req,res,next,path);
-        });
-    }
-
-    //静态服务器目录
-    this.static = function(path,options){
-        app.use(express.static(path,options));
-    }
-
-    this.start = function(){
-        app.use(router);
-        var port = app.get('port') || 80;
-        app.listen(port);
-    }
+var cosjs = function(app){
+    var self = this;
+    //群集
+    this.cluster = require('./lib/cluster');
+    //模块
+    this.library = require('./lib/library');
 
     this.config = function(name, key, dir) {
         var root = app.get('root');
-        var share = app.get('share') || '';
+        var share = app.get('share');
         var file = [root,share,dir||'config',name].join('/');
-        try{
-            var data = require(file);
-        }
-        catch (e) {
-            var data = false;
-        }
+        var data = require(file);
         if(!data){
             return false;
         }
@@ -108,82 +30,94 @@ var cosjs = function(){
 
     this.loader = function (name,dir){
         var root = app.get('root');
-        var share = app.get('share') || '';
-        var file = [root,dir||share,name].join('/');
-        var model = false;
-        try{
-            model = require(file);
-        }
-        catch (e){
-            model = false;
-        }
-        return model;
+        var share = app.get('share');
+        var file = [root,dir||share||'',name].join('/');
+        return require(file);
     }
 
-    var response = function(req,res,next,path){
-        var getHeader = req['get'];
-        req['cosjs'] = {};
-        if(!req['body']){
-            req['body'] = {};
+
+    this.handle = function(req,res,path,name,options){
+        if(!options){
+            options = {};
         }
+        onRequest(req,res);
+        if(options['session']){
+            req['session'] = session(app, req, res);
+        }
+        var root = app.get('root');
+        var file = [root,path].join('/');
+        var M = require(file);
+        M[name](req,res);
+    }
+
+    this.start = function(){
+        app.use(onError);
+        var port = app.get('port') || 80;
+        app.listen(port);
+    }
+
+    var onRequest =  function(req,res) {
         req['get'] = function (key, type) {
-            var val = req['params'][key] || req['query'][key] || req['body'][key] || null;
+            var body = req['body'] || {};
+            var val = req['params'][key] || req['query'][key] || body[key] || null;
             if (type && val !== null) {
-                val = exports.library.dataFormat(val, type);
+                val = self.library.dataFormat(val, type);
             }
             return val;
         }
 
-        req['getHeader'] = getHeader;
-
-        req['session'] = function(keys,callback){
-            if (!req['cosjs']['session']) {
-                req['cosjs']['session'] = session(app, req, res);
-            }
-            if (arguments.length == 0) {
-                return req['cosjs']['session'];
-            }
-            if (typeof callback != 'function') {
-                callback = exports.library.callback;
-            }
-            return req['cosjs']['session'].get(keys, callback);
-        }
-
-        res["binary"] = function(name,data){
+        res["binary"] = function (name, data) {
             var arr = name.split('.');
-            var ContentType = res.type(name||'html');
+            var ContentType = res.type(name || 'html');
             res.set("Content-Type", ContentType);
             res.set("Content-Length", data.length);
             res.set("Content-Disposition", "attachment; filename=" + name);
             res.send(data);
         }
 
-        res["callback"] = function(code,data,cache){
-            var data = {"code":code,"data":data};
-            if(cache){
+        res["callback"] = function (code, data, cache) {
+            var data = {"code": code, "data": data};
+            if (cache) {
                 data['cache'] = cache;
             }
-            var msgPack = app.get('msgPack');
-            if(msgPack){
-                msgPack(req,res,data);
+            var filter = app.get('filter');
+            if (filter) {
+                filter(req, res, data);
             }
-            if(req['cosjs']['session']){
-                req['cosjs']['session']['finish']();
+            if (req['session'] && req['session']['finish']) {
+                req['session']['finish']();
             }
             res.jsonp(data);
         }
+    }
 
-		if(typeof path == 'function'){
-			return path(req,res,next);
-		}else{
-			var root = app.get('root');
-			var file = [root,path||'',req.params[0]].join('/');
-			var name = req.params[1];
-			var api = require(file);
-			api[name](req,res);
-		}
+    var onError = function (err, req, res, next) {
+        var msg = err.stack || err;
+        console.log(msg);
+        res.status(500);
+        res.callback ? res.callback('error',req.params) :  res.send(msg);
+        restart();
+    }
+    //重启进程
+    var restart = function() {
+        try {
+            var cluster = require('cluster');
+            // make sure we close down within 30 seconds
+            var killtimer = setTimeout(function () {
+                process.exit(1);
+            }, 2000);
+            // But don't keep the process open just for that!
+            killtimer.unref();
+            // stop taking new requests.
+            //serv.close();
+            // Let the master know we're dead.  This will trigger a
+            // 'disconnect' in the cluster master, and then it will fork
+            // a new worker.
+            cluster.worker.disconnect();
+        }
+        catch(e){
+            console.log('cluster.worker.disconnect false');
+        }
     }
 }
-
-
 
