@@ -41,12 +41,19 @@ var cosjs = function(app){
             options = {};
         }
         onRequest(req,res);
+        var root = app.get('root');
+        var file = [root,path].join('/');
+
+        var M = require(file);
+
+        if(typeof M[name] !='function'){
+            return res.callback('error','method not exist in '+path)
+        }
+
         if(options['session']){
             req['session'] = session(app, req, res);
         }
-        var root = app.get('root');
-        var file = [root,path].join('/');
-        var M = require(file);
+
         M[name](req,res);
     }
 
