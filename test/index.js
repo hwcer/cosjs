@@ -12,8 +12,8 @@ app.set('views',root + '/view');
 app.set('views',root + '/view');
 app.set('view engine','ejs');
 //session配置
-app.set('session id','sessid');                       //session id
-app.set('session lock',true);                         //是否开启session锁
+app.set('session id','_id');                          //session id,此ID必须以get,post方式传输
+app.set('session lock',[10,200]);                     //是否开启session锁 ,false || [等待次数,等待时间]
 app.set('session dtype','redis');                    //session 存储类型 redis/momgo/object(自定义对象)
 app.set('session dbase','127.0.0.1:27017');         //session 存储数据库(redis/mongo)地址
 app.set('session expire',3600);                       //session 有效期(redis有效,mongo需后台程序清理)
