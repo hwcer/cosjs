@@ -1,18 +1,13 @@
 {
   "name": "cosjs",
   "description": "webgame server framework",
-  "version": "2.0.1",
+  "version": "2.2.0",
   "main": "./index.js",
   "author": {
     "name": "wanchao.huang",
     "email": "hwclegend@163.com"
   },
-  "keywords": [
-    "web",
-    "game",
-    "server",
-    "framework"
-  ],
+  "keywords": [  "web",  "game",  "server", "framework" ],
   "licenses": [
     {
       "type": "Apache License, Version 2.0",
@@ -25,7 +20,7 @@
     "mongodb": ">=1.4.19"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": "4.2.x"
   },
   "directories": {
     "lib": "./lib/"

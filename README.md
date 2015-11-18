@@ -13,17 +13,10 @@ Install with:
 Simple example, included as `test/index.js`:
 
 ```js
-    var express = require('express');
-    var app = express();
-    var cosjs = require('cosjs')(app);
-
-	app.get('/*/*/',function(req,res){
-        cosjs.handle(req,res,'api/'+req.params[0],req.params[1],{"session":true});
-    });
-
-    var cluster = cosjs.cluster;
-    cluster.fork('http',cosjs.start ,require('os').cpus().length);
-    cluster.start();
+    var cosjs = require('cosjs');
+	var app = cosjs.http();
+	app.loader( 'get','/api/*/*/',__dirname+'/api/');
+	cosjs.start();
 ```
 
 
