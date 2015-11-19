@@ -15,6 +15,8 @@ cosjs.fork('test3',1,function(){
     console.log('test3 start');
     //启动test2
     process.send('start test2');
+    process.send('start test2');
+    process.send('start test2');
     //重启test1
     process.send('restart test1');
     //自己也没事了 可以关闭了
