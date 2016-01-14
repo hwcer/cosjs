@@ -35,7 +35,15 @@ app.set('session secret','cosjs');                       //SESSION 密匙
 app.set('session storage','cache');                     //存储,必须为pool中一个REDIS连接名称,或者自定义的数据库操作对象
 app.set('session expire',7200);                          //session过期时间(S)
 //use Route
-app.loader( 'get','/api/*/*/',__dirname+'/api/');
+//使用 http://127.0.0.1/module/     访问api下面的login模块(方法),http://127.0.0.1/login/
+//使用 http://127.0.0.1/module/fun   访问api下面的module模块中的每一个方法,如:http://127.0.0.1/test/index
+app.get('/*/*/',function(req,res,next){
+    __dirname+'/api/';
+    var file = __dirname + '/api/'+ req.params[0];
+    var fun = req.params[1];
+    console.log(req.params);
+    app.loader(req,res,file,fun);  //加载file,并执行fun
+});
 //===================start cluster========================//
 cosjs.start();
 
