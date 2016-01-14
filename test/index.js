@@ -38,10 +38,8 @@ app.set('session expire',7200);                          //session过期时间(S
 //使用 http://127.0.0.1/module/     访问api下面的login模块(方法),http://127.0.0.1/login/
 //使用 http://127.0.0.1/module/fun   访问api下面的module模块中的每一个方法,如:http://127.0.0.1/test/index
 app.get('/*/*/',function(req,res,next){
-    __dirname+'/api/';
     var file = __dirname + '/api/'+ req.params[0];
     var fun = req.params[1];
-    console.log(req.params);
     app.loader(req,res,file,fun);  //加载file,并执行fun
 });
 //===================start cluster========================//
