@@ -15,9 +15,9 @@
     }
   ],
   "dependencies": {
-    "express": ">=4.13.3",
-    "redis": ">=0.12.1",
-    "mongodb": ">=1.4.19"
+    "express": ">=4.12.0",
+    "redis": ">=2.4.0",
+    "mongodb": ">=2.0.0"
   },
   "engines": {
     "node": "4.2.x"
