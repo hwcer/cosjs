@@ -4,6 +4,9 @@ var cosjs = require('../index');
 
 cosjs.fork('test1',1,function(){
     console.log('test1 start');
+    cosjs.message('hello',function(arg){
+        console.log('test1 message:',arg);
+    });
 });
 //test2 进程数量为0,不会自动启动
 cosjs.fork('test2',0,function(){
@@ -13,14 +16,14 @@ cosjs.fork('test2',0,function(){
 
 cosjs.fork('test3',1,function(){
     console.log('test3 start');
-    //启动test2
-    process.send('start test2');
-    process.send('start test2');
-    process.send('start test2');
-    //重启test1
-    process.send('restart test1');
-    //自己也没事了 可以关闭了
-    process.exit();  //process.send('stop test3');
+    setTimeout(function(){
+        //启动2个test2,主进程中test2进程数量为0,不会自动启动
+        cosjs.send('test2','start',2);
+        //向进程1发送一个消息,执行hello命令,参数为cosjs;hello命令必须在test1中使用cosjs.message注册
+        cosjs.send('test1','hello','cosjs');
+        //自己也没事了 可以关闭了
+        cosjs.send('test3','stop');
+    },5000);
 });
 //===================database pool========================//
 cosjs.pool.set('cache','redis','127.0.0.1:6379');    //REDIS 缓存
