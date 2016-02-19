@@ -31,19 +31,34 @@ cosjs.pool.set('cache','redis','127.0.0.1:6379');    //REDIS 缓存
 var app = cosjs.http();
 //start session
 app.use(cosjs.session);
+//set session config
 app.set('session id','_id');                               //session id ,通过此id前端向后端[get,post]传session认证信息
 app.set('session key','cache');                           //session 在cache中的前缀
 app.set('session lock',[5,500]);                          //每次锁定500MS 最多5次,false:关闭session锁
 app.set('session secret','cosjs');                       //SESSION 密匙
 app.set('session storage','cache');                     //存储,必须为pool中一个REDIS连接名称,或者自定义的数据库操作对象
 app.set('session expire',7200);                          //session过期时间(S)
-//use Route
-//使用 http://127.0.0.1/module/     访问api下面的login模块(方法),http://127.0.0.1/login/
-//使用 http://127.0.0.1/module/fun   访问api下面的module模块中的每一个方法,如:http://127.0.0.1/test/index
-app.get('/*/*/',function(req,res,next){
-    var file = __dirname + '/api/'+ req.params[0];
-    var fun = req.params[1];
-    app.loader(req,res,file,fun);  //加载file,并执行fun
+//use express Route
+app.get('/app/',function(req,res,next){
+    res.end('ok');
+});
+
+//use cosjs Route
+//使用 http://127.0.0.1/api/[dir1/dir2/module/]fun            访问api目录下所有前端接口
+/**
+ *  http://127.0.0.1/api/login             直接访问login模块,此模块类型必须为function,参考api/login.js
+ *  http://127.0.0.1/api/test/index        访问test模块下的index方法
+ *  http://127.0.0.1/api/dir/test/index    访问dir目录下test模块中index方法,dir不限层数,多层使用:http://127.0.0.1/api/dir1/dir2/.../test/index
+ */
+
+var route = cosjs.route(app,__dirname);
+route.get('/api/','api');
+//route.post('/api/','api');
+//route.all('/api/','api');
+
+//use cosjs Route as express Route
+route.get('/test/',function(req,res,next){
+    res.end('ok');
 });
 //===================start cluster========================//
 cosjs.start();
