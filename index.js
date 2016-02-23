@@ -1,6 +1,8 @@
+var express = require('express');
+var library = require('./lib/library');
 exports = module.exports = require('./lib/cluster');
 
-['route','pool','task','dataset','redis','mongodb','session','library'].forEach(function(k){
+['route','pool','task','dataset','redis','mongodb','session'].forEach(function(k){
     exports[k] = require('./lib/'+k);
 });
 
@@ -17,3 +19,5 @@ exports.http = function(port,key,num,fun){
     });
     return app;
 }
+
+exports.static = express.static;

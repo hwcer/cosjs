@@ -1,5 +1,6 @@
 
 var cosjs = require('../index');
+var cookie = require('cookie-parser');
 //===================test cluster========================//
 
 cosjs.fork('test1',1,function(){
@@ -29,15 +30,13 @@ cosjs.fork('test3',1,function(){
 cosjs.pool.set('cache','redis','127.0.0.1:6379');    //REDIS 缓存
 //===================http cluster========================//
 var app = cosjs.http();
+//===================静态服务器开启========================//
+app.use(cosjs.static(__dirname + '/wwwroot'));
+
+app.use(cookie());
 //start session
-app.use(cosjs.session);
-//set session config
-app.set('session id','_id');                               //session id ,通过此id前端向后端[get,post]传session认证信息
-app.set('session key','cache');                           //session 在cache中的前缀
-app.set('session lock',[5,500]);                          //每次锁定500MS 最多5次,false:关闭session锁
-app.set('session secret','cosjs');                       //SESSION 密匙
-app.set('session storage','cache');                     //存储,必须为pool中一个REDIS连接名称,或者自定义的数据库操作对象
-app.set('session expire',7200);                          //session过期时间(S)
+app.use(cosjs.session({ lock:[10,500,0],store:"cache",expire:7200}));
+
 //use express Route
 app.get('/app/',function(req,res,next){
     res.end('ok');
