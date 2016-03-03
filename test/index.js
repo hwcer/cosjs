@@ -1,6 +1,6 @@
-
 var cosjs = require('../index');
 var cookie = require('cookie-parser');
+
 //===================test cluster========================//
 
 cosjs.fork('test1',1,function(){

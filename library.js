@@ -1,3 +1,9 @@
+String.md5 = function(str){
+    var crypto = require('crypto');
+    var _encrymd5 = crypto.createHash('md5');
+    _encrymd5.update(str.toString());
+    return _encrymd5.digest('hex');
+}
 //判断是不是对象(array排除)
 Object.isObject = function(obj){
     return typeof obj == 'object' && !Array.isArray(obj) && obj!==null;
@@ -64,17 +70,8 @@ Object.extend = function() {
     return target;
 }
 
-//将一个数组分组成num大小的多组
-Array.split = function(arr,num){
-    var i = 0,length = arr.length,ret=[];
-    while(i < length){
-        ret.push(arr.slice(i,i+num));
-        i += num;
-    }
-    return ret;
-}
 //数据库表结构多重排序
-Array.msort = function(arr,key,order){
+Array.sort = function(arr,key,order){
     if(!key){
         return false;
     }
@@ -99,10 +96,22 @@ Array.msort = function(arr,key,order){
     }
     return arr.sort(sortCompare);
 }
+//将一个数组分组成num大小的多组
+Array.split = function(arr,num){
+    var i = 0,length = arr.length,ret=[];
+    while(i < length){
+        ret.push(arr.slice(i,i+num));
+        i += num;
+    }
+    return ret;
+}
 
-String.md5 = function(str){
-    var crypto = require('crypto');
-    var _encrymd5 = crypto.createHash('md5');
-    _encrymd5.update(str);
-    return _encrymd5.digest('hex');
+
+Function.callback = function(err,ret){
+    if(err){
+        return false;
+    }
+    else{
+        return ret;
+    }
 }

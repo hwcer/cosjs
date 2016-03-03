@@ -1,8 +1,9 @@
 var express = require('express');
-var library = require('./lib/library');
+var library = require('./library');
 exports = module.exports = require('./lib/cluster');
 
-['route','pool','task','dataset','redis','mongodb','session'].forEach(function(k){
+
+['route','pool','task','formatter','redis','mongodb','session'].forEach(function(k){
     exports[k] = require('./lib/'+k);
 });
 
