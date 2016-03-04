@@ -1,7 +1,7 @@
 {
   "name": "cosjs",
   "description": "webgame server framework",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "main": "./index.js",
   "author": {
     "name": "wanchao.huang",
