@@ -13,11 +13,9 @@ Install with:
 Simple example, included as `test/index.js`:
 
 ```js
-    var cosjs = require('cosjs');
-	var app = cosjs.http();
-	app.get('/*/*/',function(req,res,next){
-        res.end("success");
-    });
+    var app = cosjs.http(80);
+    app.static(__dirname + '/wwwroot');
+    app.server('/api/',__dirname + '/api');
 	cosjs.start();
 ```
 
