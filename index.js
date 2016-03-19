@@ -1,24 +1,28 @@
-var express = require('express');
-var library = require('./library');
+require('./lib/library');
 exports = module.exports = require('./lib/cluster');
 
-
-['route','pool','task','formatter','redis','mongodb','session'].forEach(function(k){
-    exports[k] = require('./lib/'+k);
-});
-
-
+exports.pool = require('./lib/pool');
+exports.task = require('./lib/task');
 //将HTTP服务器加入到群集中
-exports.http = function(port,key,num,fun){
-    var app = require('express')();
-    //fork http server
-    exports.fork( key|| 'http', num || require('os').cpus().length , function(){
-        app.listen(port||80);
-        if(typeof fun == 'function'){
-            fun();
+exports.http = function(port,key,num,handle){
+    var http = require('./lib/http');
+    var server = http();
+    server.set('x-powered-by',false);
+    exports.http.handle = http.handle;
+    exports.http.loader = http.loader;
+    exports.http.session = require('./lib/session');
+    if(arguments.length<1){
+        return server;
+    }
+    var cpus = require('os').cpus().length;
+    exports.fork( key||'http', num || cpus , function(){
+        if( typeof handle == 'function'){
+            handle(server,function(){  server.listen(port);  });
+        }
+        else{
+            server.listen(port);
         }
     });
-    return app;
-}
 
-exports.static = express.static;
+    return server;
+}

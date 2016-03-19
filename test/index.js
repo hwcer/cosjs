@@ -1,6 +1,4 @@
 var cosjs = require('../index');
-var cookie = require('cookie-parser');
-
 //===================test cluster========================//
 
 cosjs.fork('test1',1,function(){
@@ -26,21 +24,16 @@ cosjs.fork('test3',1,function(){
         cosjs.send('test3','stop');
     },5000);
 });
-//===================database pool========================//
-cosjs.pool.set('cache','redis','127.0.0.1:6379');    //REDIS 缓存
+
+
+var root = __dirname;
 //===================http cluster========================//
-var app = cosjs.http();
-//===================静态服务器开启========================//
-app.use(cosjs.static(__dirname + '/wwwroot'));
+var app = cosjs.http(80);
+//start static
+app.static(root + '/wwwroot');
+//start server
+app.server('/api/',root + '/api');
 
-app.use(cookie());
-//start session
-app.use(cosjs.session({ lock:[10,500,0],store:"cache",expire:7200}));
-
-//use express Route
-app.get('/app/',function(req,res,next){
-    res.end('ok');
-});
 
 //use cosjs Route
 //使用 http://127.0.0.1/api/[dir1/dir2/module/]fun            访问api目录下所有前端接口
@@ -50,14 +43,10 @@ app.get('/app/',function(req,res,next){
  *  http://127.0.0.1/api/dir/test/index    访问dir目录下test模块中index方法,dir不限层数,多层使用:http://127.0.0.1/api/dir1/dir2/.../test/index
  */
 
-var route = cosjs.route(app,__dirname);
-route.get('/api/','api');
-//route.post('/api/','api');
-//route.all('/api/','api');
 
-//use cosjs Route as express Route
-route.get('/test/',function(req,res,next){
-    res.end('ok');
+////use cosjs Route as express Route
+app.get('/test/*',function(req,res,next){
+    cosjs.http.handle(req,res,root+'/api','test/index');
 });
 //===================start cluster========================//
 cosjs.start();
