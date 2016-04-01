@@ -28,7 +28,7 @@ cosjs.fork('test3',1,function(){
 
 var root = __dirname;
 //===================http cluster========================//
-var app = cosjs.http(80);
+var app = cosjs.http('http',0,80);
 //start static
 app.static(root + '/wwwroot');
 //start server
