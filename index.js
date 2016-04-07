@@ -23,6 +23,6 @@ exports.socket = function(key,work,port,handle){
 }
 
 
-new Array("pool","task","route","buffer","session").forEach(function (name) {
+new Array("pool","session").forEach(function (name) {
     exports[name] = require('./lib/'+name);
 });
