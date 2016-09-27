@@ -1,13 +1,11 @@
 exports = module.exports = require('cosjs.cluster');
-exports.root = '';
 //启动HTTP服务器,num
 exports.http = function(opts,nums){
     if(!arguments.length) {
         return require('cosjs.http')();
     }
     var key = opts.key || 'http';
-    var cpus = require('os').cpus().length;
-    nums = nums || cpus;
+    nums = nums || require('os').cpus().length;
     for(var i=0;i<nums;i++){
         exports.fork(key,forkHttp,opts);
     }
@@ -33,23 +31,24 @@ exports.socket = function(opts){
 
 function forkHttp(opts){
     var app = require('cosjs.http')();
-    if(opts.shell){
-        shell.call(app,opts.shell,opts);
-    }
     //server
     if(opts.server){
         var arr = Array.isArray(opts.server) ? opts.server : [opts.server];
         arr.forEach(function(cfg){
-            var root = [exports.root,cfg.handle].join('/');
+            var root = [opts.root,cfg.handle].join('/');
             var route = cfg.route;
             app.server(route,root,cfg);
+            if(opts.shell && cfg.name){
+                var path = [opts.shell,cfg.name].join('/');
+                shell.call(app,path,cfg);
+            }
         });
     }
     //static
     if(opts.static){
         var arr = Array.isArray(opts.static) ? opts.static : [opts.static];
         arr.forEach(function(cfg){
-            var root = [exports.root,cfg.handle].join('/');
+            var root = [opts.root,cfg.handle].join('/');
             var route = cfg.route;
             app.static(route,root,cfg);
         });
@@ -61,23 +60,25 @@ function forkHttp(opts){
 function forkSocket(key,cfg,opts){
     var socket = require('cosjs.socket')(opts);
     var app = socket[key](cfg);
-    if(opts.shell){
-        var model = cfg['model'] || key;
-        shell.call(app,opts.shell,model,cfg);
+    if(opts.shell && cfg.name ){
+        var path = [opts.shell,cfg.name].join('/');
+        shell.call(app,path,cfg);
     }
 }
 
-function shell(handle){
-    var arr = Array.prototype.slice.call(arguments,1);
+function shell(handle,opts){
     var method = null;
     if(typeof handle == 'function' ){
         method = handle;
     }
     else{
-        var file = [exports.root,handle].join('/');
+        var file = require.resolve(handle);
+        if(!file){
+            return;
+        }
         method = require(file);
     }
     if(typeof method == 'function' ){
-        method.apply(this,arr);
+        method.call(this,opts);
     }
 }
