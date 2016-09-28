@@ -18,7 +18,7 @@ exports.http = {
         {route:'/api/*',name:'http',handle:'handle',method:'all',output:'jsonp',subpath:4}
     ],
     'session'  : [
-        {route:'/api/login/',level:0},
+        {route:'/api/login/',redis:'cache',ObjectID:false,level:0},
         {route:'/api/*',redis:'cache',ObjectID:false,level:2,secret:'109927657'}
     ],
 };
