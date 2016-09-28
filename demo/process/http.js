@@ -8,7 +8,7 @@ cosjs.on('restart',cosjs.restart);
 
 module.exports = function(opts){
     //设置数据库
-    var pool   = require('cosjs.pool');
+    var pool   = cosjs.library('pool');
     var config = require('../config');
     pool.redis( 'cache',config.cache);
     pool.redis( 'redis',config.redis);
@@ -19,9 +19,6 @@ module.exports = function(opts){
     if(config.debug){
         app.set('view cache',false);
     }
-    var route = '/api/*';
-    var options = {redis:pool.acquire('cache'),ObjectID:false,level:{'default':2,'/login/':0},secret:'109927657' };
-    app.use(route,cookie());
-    app.use(route,body.urlencoded({ extended: true,limit:"100kb" }));     // for parsing application/x-www-form-urlencoded
-    app.session(route,options);  //开启SESSION
+    app.use('/',cookie());
+    app.use('/',body.urlencoded({ extended: true,limit:"100kb" }));
 };
