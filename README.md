@@ -1,7 +1,7 @@
-cosjs - a node.js web server
+cosjs - a node.js http & socket server
 ===========================
 
-This is a  web server for node.js.  easy to create web or mobile game server.
+This is a  web http & socket for node.js.  easy to create web or mobile game server.
 
 
 Install with:
@@ -10,17 +10,37 @@ Install with:
 
 ## Usage
 
-Simple example, included as `test/session.js`:
+Simple example, included as `demo/index.js`:
 
-```js
-    var app = cosjs.http(80);
-    app.static(__dirname + '/wwwroot');
-    app.server('/api/',__dirname + '/api');
-	cosjs.start();
+```index.js
+    var cosjs = require('../index');
+    var config = require('./config');
+    cosjs.http(config.http);
+    cosjs.socket(config.socket);
+    cosjs.start();
 ```
 
+```config.js
+    var root = __dirname;
+    exports = module.exports = {
+        debug: 1,
+        cache   : '127.0.0.1:6379',
+        mongodb : '127.0.0.1:27017/test',
+    }
 
+    exports.http = {
+        'port'    : 80,
+        'root'    : root + '/http',
+        'shell'   : root+'/process/http',
+        'host'    : '127.0.0.1',
+        'worker'  : 0,
+        'static'  : {route:'/',handle: 'wwwroot'},
+        'server'  : [
+            {route:'/api/:m/(*)?',handle:'handle',method:'all',output:'jsonp',subpath:4}
+        ],
+    };
+```
 
 ## Demo
 
-test/session.js
+demo/index.js
