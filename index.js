@@ -38,12 +38,8 @@ exports.library = require('cosjs.library');
 
 function forkHttp(opts){
     var app = require('cosjs.http')();
-    //session
-    if(opts.session){
-        var arr = Array.isArray(opts.session) ? opts.session : [opts.session];
-        arr.forEach(function(cfg){
-            app.session(cfg.route,cfg);
-        });
+    if(opts.shell){
+        shell.call(app,opts.shell);
     }
     //server
     if(opts.server){
@@ -52,10 +48,6 @@ function forkHttp(opts){
             var root = [opts.root,cfg.handle].join('/');
             var route = cfg.route;
             app.server(route,root,cfg);
-            if(opts.shell && cfg.name){
-                var path = [opts.shell,cfg.name].join('/');
-                shell.call(app,path,cfg);
-            }
         });
     }
     //static
@@ -73,25 +65,21 @@ function forkHttp(opts){
 function forkSocket(key,cfg,opts){
     var socket = require('cosjs.socket')(opts);
     var app = socket[key](cfg);
-    if(opts.shell && cfg.name ){
-        var path = [opts.shell,cfg.name].join('/');
-        shell.call(app,path,cfg);
+    if(opts.shell){
+        shell.call(app,opts.shell,key,cfg);
     }
 }
 
-function shell(handle,opts){
+function shell(handle){
     var method = null;
     if(typeof handle == 'function' ){
         method = handle;
     }
     else{
-        try {
-            method = require(handle);
-        }catch (e){
-            method = null;
-        }
+        method = require(handle);
     }
+    var args = Array.prototype.slice.call(arguments,1);
     if(typeof method == 'function' ){
-        method.call(this,opts);
+        method.apply(this,args);
     }
 }

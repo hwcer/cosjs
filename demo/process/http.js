@@ -6,7 +6,7 @@ const cookie = require('cookie-parser');
 
 cosjs.on('restart',cosjs.restart);
 
-module.exports = function(opts){
+module.exports = function(){
     //设置数据库
     var pool   = cosjs.library('pool');
     var config = require('../config');
@@ -19,6 +19,10 @@ module.exports = function(opts){
     if(config.debug){
         app.set('view cache',false);
     }
-    app.use('/',cookie());
-    app.use('/',body.urlencoded({ extended: true,limit:"100kb" }));
+    var route = '/api/:m/(*)?';
+    app.use(route,cookie());
+    app.use(route,body.urlencoded({ extended: true,limit:"100kb" }));
+    app.session('/api/login/',{redis:'cache',guid:false,level:0,secret:'109927657'});
+    app.session(route,{redis:'cache',guid:false,level:2,secret:'109927657'});
+
 };
