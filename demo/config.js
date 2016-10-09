@@ -2,9 +2,8 @@
 
 exports = module.exports = {
     debug: 2,
-    cache   : '192.168.2.250:6379',
-    redis   : '192.168.2.250:6380',
-    mongodb : '192.168.2.250:27017/test',
+    cache   : '127.0.0.1:6379',
+    mongodb : '127.0.0.1:27017/test',
 }
 
 exports.http = {
@@ -23,7 +22,7 @@ exports.http = {
 exports.socket = {
     root      : root + '/socket',
     shell     : root + '/process/socket',
-    manager   : {host:'192.168.2.250',port:6379,name:'manager',emit:'redis'},          //manager emitter opts
+    manager   : {host:'127.0.0.1',port:6379,name:'manager',emit:'redis'},          //manager emitter opts
     gateway   : {host:'127.0.0.1',port:100,name:'gateway'},
     connector : [
         {host:'127.0.0.1',port:81,maxClient:5000,refresh:1000,},
