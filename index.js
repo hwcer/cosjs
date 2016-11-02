@@ -2,14 +2,14 @@ var cpus = require('os').cpus().length;
 exports = module.exports = require('./lib/cluster');
 exports.library = require('cosjs.library');
 //启动HTTP服务器,num
-exports.http = function(opts){
+exports.http = function(port,spath){
     if(!arguments.length) {
         return require('cosjs.http')();
     }
-    var key = opts.key || 'http';
-    var nums = opts.worker || cpus;
+    var key = 'http', nums = arguments[2] || cpus;
+
     for(var i=0;i<nums;i++){
-        exports.fork(key,forkHttp,opts);
+        exports.fork(key,forkHttp,port,spath);
     }
 }
 
@@ -34,32 +34,12 @@ exports.socket = function(opts){
 }
 
 
-
-
-
-
-function forkHttp(opts){
+function forkHttp(port,spath){
     var app = require('cosjs.http')();
-    if(opts.shell){
-        shell.call(app,opts.shell);
+    if(spath){
+        shell.call(app,spath);
     }
-    //server
-    if(opts.server){
-        var arr = Array.isArray(opts.server) ? opts.server : [opts.server];
-        arr.forEach(function(server){
-            var route = server.route||'/';
-            app.server(route,server);
-        });
-    }
-    //static
-    if(opts.static){
-        var arr = Array.isArray(opts.static) ? opts.static : [opts.static];
-        arr.forEach(function(server){
-            var route = server.route||'/';
-            app.static(route,server);
-        });
-    }
-    app.listen(opts.port);
+    app.listen(port);
 }
 
 function forkSocket(key,cfg,opts){

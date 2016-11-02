@@ -1,20 +1,15 @@
 ﻿var root = __dirname;
-var dbserv = '127.0.0.1';
+var dbserv = '192.168.2.250';
 exports = module.exports = {
-    debug: 2,
+    root    : root,
+    debug   : 2,
     cache   : dbserv + ':6379',
     mongodb : dbserv +':27017/test',
 }
 
 exports.http = {
     'port'    : 80,
-    'host'    : '127.0.0.1',
     'shell'   : root+'/share/http',
-    'worker'  : 0,
-    'static'  : {route:'/',root: root+'/wwwroot'},
-    'server'  : [
-        {route:'/api/:m/(*)?',root:root + '/handle-http',method:'all',output:'jsonp',subpath:4}
-    ],
 };
 
 
