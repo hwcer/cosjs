@@ -9,15 +9,15 @@ cosjs.on('restart',cosjs.restart);
 module.exports = function(){
     //设置数据库
     var pool   = cosjs.library('pool');
-    var config = require('../config');
+    var config = require('../config').base;
     var root = config.root;
     pool.redis( 'cache',config.cache);
     pool.mongodb( 'mongodb',config.mongodb);
     var app = this , route = '/api/:m/(*)?' ;
     app.use(route,cookie_parser());
     app.use(route,body_parser.urlencoded({ extended: true,limit:"100kb" }));
-    app.session(route,{redis:'cache',guid:false,level:2});
-    app.server(route,{root:root + '/handle-http',method:'all',output:'jsonp',subpath:4,before:HandleBefore,finish:HandleFinish});
+    app.session(route,{redis:pool.get('cache'),guid:false,level:2});
+    app.server(route,{root:root + '/server',method:'all',output:'jsonp',subpath:4,before:HandleBefore,finish:HandleFinish});
     app.static('/',{root: root+'/wwwroot'});
 };
 

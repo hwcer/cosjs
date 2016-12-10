@@ -2,14 +2,21 @@ var cpus = require('os').cpus().length;
 exports = module.exports = require('./lib/cluster');
 exports.library = require('cosjs.library');
 //启动HTTP服务器,num
-exports.http = function(port,spath){
-    if(!arguments.length) {
-        return require('cosjs.http')();
+exports.http = function(port,shell,fnum){
+    if(!arguments.length){
+        return require('cosjs.http');
     }
-    var key = 'http', nums = arguments[2] || cpus;
+    if(typeof arguments[0] === 'object'){
+        var opts = arguments[0];
+    }
+    else{
+        var opts = {"port":arguments[0]||80,"shell":arguments[1]||null,"fnum":arguments[2]||0};
+    }
 
-    for(var i=0;i<nums;i++){
-        exports.fork(key,forkHttp,port,spath);
+    var name = opts['name'] || 'http', fnum = opts['fnum'] || cpus;
+
+    for(var i=0;i<fnum;i++){
+        exports.fork(name,forkHttp,opts);
     }
 }
 
@@ -20,34 +27,37 @@ exports.socket = function(opts){
     }
     if(opts.gateway){
         var name = opts.gateway.name || 'gateway';
-        exports.fork(name,forkSocket,'gateway',opts.gateway,opts);
+        var setting = opts.gateway;
+        exports.fork(name,forkGateway,setting,opts);
     }
-    opts.connector.forEach(function(ccfg){
-        var name = opts.gateway.name || 'connector';
-        exports.fork(name,forkSocket,'connector',ccfg,opts);
-    })
-    var worker = opts.worker || [];
-    worker.forEach(function(ccfg){
-        var name = ccfg.name || 'worker';
-        exports.fork(name,forkSocket,'worker',ccfg,opts);
+    opts.socket.forEach(function(setting){
+        var name = opts.gateway.name || 'socket';
+        exports.fork(name,forkSocket,setting,opts);
     })
 }
 
 
-function forkHttp(port,spath){
+function forkHttp(opts){
     var app = require('cosjs.http')();
-    if(spath){
-        shell.call(app,spath);
+    if(opts['shell']){
+        shell.call(app,opts['shell'],opts);
     }
-    app.listen(port);
+    app.listen(opts['port']);
 }
 
-function forkSocket(key,cfg,opts){
-    var socket = require('cosjs.socket')(opts);
-    var app = socket[key](cfg);
-    if(opts.shell){
-        shell.call(app,opts.shell,key,cfg);
+function forkSocket(setting,opts){
+    var app = require('cosjs.socket').socket(setting);
+    if(opts['emitter']){
+        app.emitter(opts['emitter']);
     }
+    if(opts['shell']){
+        shell.call(app,opts['shell'],setting);
+    }
+}
+
+function forkGateway(setting,opts){
+    var app = require('cosjs.socket').gateway(setting,opts['emitter']||null);
+    return app;
 }
 
 function shell(handle){
