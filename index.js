@@ -56,8 +56,7 @@ function forkSocket(setting,opts){
 }
 
 function forkGateway(setting,opts){
-    var app = require('cosjs.socket').gateway(setting,opts['emitter']||null);
-    return app;
+    require('cosjs.socket').gateway(setting,opts['emitter']||null);
 }
 
 function shell(handle){

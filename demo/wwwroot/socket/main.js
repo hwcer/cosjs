@@ -1,5 +1,5 @@
 $(function() {
-  var GATEWAY = 'ws://192.168.1.73:100';
+  var GATEWAY = 'ws://127.0.0.1:100';
   var $window = $(window);
 
 
