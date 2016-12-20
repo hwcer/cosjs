@@ -11,12 +11,12 @@ exports.base = {
 
 exports.http = {
     'fnum'    : 0,             //fock num,启动进程数量，默认CPU个数
-    'port'    : 85,
-    'shell'   : root+'/share/http',
+    'port'    : 99,
+    'shell'   : root+'/process/http',
 };
 
 exports.socket = {
-    shell     : root + '/share/socket',
+    shell     : root + '/process/socket',
     emitter   : {host:host,port:6379,root:root + '/socket/remote'},          //redis emitter
     gateway   : {host:'127.0.0.1',port:100},
     socket : [
@@ -24,6 +24,7 @@ exports.socket = {
         {host:'127.0.0.1',port:82,maxClient:100,refresh:1000,root:root + '/socket/handle',},
         {host:'127.0.0.1',port:83,maxClient:100,refresh:1000,root:root + '/socket/handle',},
         {host:'127.0.0.1',port:84,maxClient:100,refresh:1000,root:root + '/socket/handle',},
+        {host:'127.0.0.1',port:85,maxClient:100,refresh:1000,root:root + '/socket/handle',},
     ],
 
 }

@@ -86,6 +86,20 @@ ul {
   font-weight: 100;
 }
 
+
+
+/* queue Page */
+
+.queue.page {
+  display: none;
+  background-color: #000;
+}
+
+.queue.page .title {
+  font-size: 200%;
+}
+
+
 /* Chat page */
 
 .chat.page {
@@ -128,7 +142,6 @@ ul {
 }
 
 .username {
-  float: left;
   font-weight: 700;
   overflow: hidden;
   padding-right: 15px;
@@ -136,41 +149,15 @@ ul {
 }
 
 /* Input */
-.inputTable {
-  border: 0px solid #000;
-  bottom: 0;
-  left: 0;
-  outline: none;
-  right: 0;
-  width: 100%;
-  position: absolute;
-}
+
 .inputMessage {
-  border: 5px solid #000;
+  border: 10px solid #000;
   bottom: 0;
   height: 60px;
   left: 0;
   outline: none;
   padding-left: 10px;
-  right: 0;
-  width: 100%;
-}
-
-.selectCid {
-  border: 5px solid #000;
-  bottom: 0;
-  height: 60px;
-  left: 0;
-  outline: none;
-  right: 0;
-  width: 100%;
-}
-.showTar {
-  border: 5px solid #000;
-  bottom: 0;
-  height: 60px;
-  left: 0;
-  outline: none;
+  position: absolute;
   right: 0;
   width: 100%;
 }

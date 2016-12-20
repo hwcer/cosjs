@@ -7,54 +7,42 @@
 </head>
 <body>
   <ul class="pages">
-
-    <li class="login page" id="login">
-      <div class="form">
-        <h3 class="title">你的破名字</h3>
-        <input id="token" class="usernameInput" type="text" maxlength="32" />
-      </div>
-    </li>
-
-    <li class="login page" id="queue" style="display: none">
-      <div class="form">
-        <h3 class="title" id="queue-title">loading...</h3>
-      </div>
-    </li>
-
-    <li class="chat page" id="chat" style="display: none">
+    <li class="chat page" id="chat">
       <div class="chatArea">
-        <ul id="messages" class="messages"></ul>
+        <ul class="messages"></ul>
       </div>
-      <table width="100%" border="0" cellpadding="0" cellspacing="0"  frame=void class="inputTable">
-        <tr>
-          <td style="width: 120px">
-            <select name="cid" id="cid" class="selectCid">
-            <option value="1">世界</option>
-            <option value="3">公会</option>
-            <option value="4">队伍</option>
-            <option value="9">私聊</option>
-          </select>
-            <input id="tar" type="hidden"  value=""/>
-          </td>
-          <td  style="width: 150px">
-            <input id="tarName" class="inputMessage" disabled="disabled" value=""/>
-          </td>
-          <td>
-            <input id="msg" class="inputMessage" placeholder="Type here..."/>
-          </td>
-        </tr>
-      </table>
+      <input class="inputMessage" placeholder="Type here..." id="message"/>
+    </li>
+
+    <li class="login page" id="loginPage">
+      <div class="form">
+        <h3 class="title">What's your nickname?</h3>
+        <input class="usernameInput" type="text" maxlength="14" id="username" />
+      </div>
+    </li>
+
+    <li class="gateway page" id="gateway">
+      <div class="form">
+        <h3 class="title" id="gatewayMessage"></h3>
+      </div>
     </li>
 
   </ul>
-  <div id="sysmsg" style="position:absolute;top:0px;left:0px;width:100%; color: #2e7fdd"></div>
   <script src="jquery-1.10.2.min.js"></script>
-  <script src="socket/socket.io-1.4.5.js"></script>
-  <script src="socket/message.js"></script>
-  <script src="socket/client.js"></script>
-  <script src="socket/login.js"></script>
-  <script src="socket/queue.js"></script>
-  <script src="socket/chat.js"></script>
-  <script src="socket/main.js"></script>
+  <script src="socket.io-1.4.5.js"></script>
+  <script src="login.js"></script>
+  <script src="gateway.js"></script>
+  <script src="chat.js"></script>
+  <script>
+    var $currAct = null;
+    $(function() {
+      login.start();
+      $(window).keydown(function (event) {
+        if (event.which === 13 && $currAct) {
+          $currAct.submit();
+        }
+      });
+    });
+  </script>
 </body>
 </html>

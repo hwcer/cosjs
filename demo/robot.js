@@ -1,7 +1,7 @@
 ﻿//agent启动脚本
 const ioClient    = require('socket.io-client');
-const maxClient = 1500;
-const gateway = 'ws://192.168.1.73:100';
+const maxClient = 1;
+const gateway = 'ws://117.74.140.198:190';
 var clients = [];
 const msgs = [
     '不要和我比懒，我懒得和你比',

@@ -2,24 +2,10 @@
 /**
  * 登录信息
  */
-exports = module.exports = function (data) {
+exports = module.exports = function (name) {
     var uid = this.socket.id;
-    var club = random(0,30);
-    var group = random(1,500);
-    var scene = random(1,30);
-    //data['sid'] = uid;
-    data['uid'] = uid;
-    data['club'] = club;
-
-    this.club = club;
-    this.group = group;
-    this.scene = scene;
+    var data = {name:name,uid:uid};
     this.data = data;
-
-    this.join('club',club);
-    this.join('group',group);
-    this.join('scene',scene);
-
     this.socket.send('login',data);
     //this.broadcast().send('online',data);
 };

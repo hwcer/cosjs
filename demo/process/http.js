@@ -17,7 +17,7 @@ module.exports = function(){
     app.use(route,cookie_parser());
     app.use(route,body_parser.urlencoded({ extended: true,limit:"100kb" }));
     app.session(route,{redis:pool.get('cache'),guid:false,level:2});
-    app.server(route,{root:root + '/server',method:'all',output:'jsonp',subpath:4,before:HandleBefore,finish:HandleFinish});
+    app.server(route,{root:root + '/handle',method:'all',output:'jsonp',subpath:4,before:HandleBefore,finish:HandleFinish});
     app.static('/',{root: root+'/wwwroot'});
 };
 
