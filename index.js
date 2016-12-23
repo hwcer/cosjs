@@ -27,12 +27,11 @@ exports.socket = function(opts){
     }
     if(opts.gateway){
         var name = opts.gateway.name || 'gateway';
-        var setting = opts.gateway;
-        exports.fork(name,forkGateway,setting,opts);
+        exports.fork(name,forkGateway,opts.gateway);
     }
     opts.socket.forEach(function(setting){
         var name = opts.gateway.name || 'socket';
-        exports.fork(name,forkSocket,setting,opts);
+        exports.fork(name,forkSocket,setting);
     })
 }
 
@@ -45,18 +44,18 @@ function forkHttp(opts){
     app.listen(opts['port']);
 }
 
-function forkSocket(setting,opts){
-    var app = require('cosjs.socket').socket(setting);
-    if(opts['emitter']){
-        app.emitter(opts['emitter']);
-    }
-    if(opts['shell']){
-        shell.call(app,opts['shell'],setting);
+function forkSocket(opts){
+    var app = require('cosjs.socket').socket(opts);
+    if(opts.shell){
+        shell.call(app,opts.shell,opts);
     }
 }
 
-function forkGateway(setting,opts){
-    require('cosjs.socket').gateway(setting,opts['emitter']||null);
+function forkGateway(opts){
+    var gateway = require('cosjs.socket').gateway(opts);
+    if(opts.shell){
+        shell.call(gateway,opts.shell,opts);
+    }
 }
 
 function shell(handle){
