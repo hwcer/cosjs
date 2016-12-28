@@ -1,5 +1,5 @@
 ﻿var root = __dirname;
-var host = '192.168.2.250';
+var host = '127.0.0.1';
 
 
 exports.base = {
@@ -16,15 +16,16 @@ exports.http = {
 };
 
 exports.socket = {
+    root      : root + '/socket/remote',
     shell     : root + '/process/socket',
-    emitter   : {host:host,port:6379,root:root + '/socket/remote'},          //redis emitter
-    gateway   : {host:'127.0.0.1',port:100},
+    emitter   : {host:host,port:6379},          //redis emitter
+    gateway   : {host:host,port:100},
     socket : [
-        {host:'127.0.0.1',port:81,maxClient:100,refresh:1000,root:root + '/socket/handle',},
-        {host:'127.0.0.1',port:82,maxClient:100,refresh:1000,root:root + '/socket/handle',},
-        {host:'127.0.0.1',port:83,maxClient:100,refresh:1000,root:root + '/socket/handle',},
-        {host:'127.0.0.1',port:84,maxClient:100,refresh:1000,root:root + '/socket/handle',},
-        {host:'127.0.0.1',port:85,maxClient:100,refresh:1000,root:root + '/socket/handle',},
+        {host:'127.0.0.1',port:81,maxClient:100,refresh:1000,},
+        {host:'127.0.0.1',port:82,maxClient:100,refresh:1000,},
+        {host:'127.0.0.1',port:83,maxClient:100,refresh:1000,},
+        {host:'127.0.0.1',port:84,maxClient:100,refresh:1000,},
+        {host:'127.0.0.1',port:85,maxClient:100,refresh:1000,},
     ],
 
 }
