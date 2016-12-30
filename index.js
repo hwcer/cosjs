@@ -25,16 +25,14 @@ exports.socket = function(opts){
     if(!arguments.length){
         return require('cosjs.socket');
     }
-    var shell = opts.shell;
     if(opts.gateway){
         var name = opts.gateway.name || 'gateway';
         var setting = opts.gateway;
-        exports.fork(name,forkGateway,shell,name,setting,opts.emitter);
+        exports.fork(name,forkGateway,name,setting,opts);
     }
     opts.socket.forEach(function(setting){
-        var root = opts.root;
         var name = setting.name || 'socket';
-        exports.fork(name,forkSocket,shell,name,root,setting,opts.emitter);
+        exports.fork(name,forkSocket,name,setting,opts);
     })
 }
 
@@ -47,17 +45,20 @@ function forkHttp(opts){
     app.listen(opts['port']);
 }
 
-function forkSocket(shell,name,root,setting,emitter){
-    var app = require('cosjs.socket').socket(root,setting,emitter);
-    if(shell){
-        forkShell.call(app,shell,name,setting);
+function forkSocket(name,setting,opts){
+    var app = require('cosjs.socket').socket(opts.root,setting,opts.emitter);
+    if(opts.shell){
+        forkShell.call(app,opts.shell,name,setting);
+    }
+    if(opts.trigger){
+        app.trigger();
     }
 }
 
-function forkGateway(shell,name,setting,emitter){
-    var app = require('cosjs.socket').gateway(setting,emitter);
-    if(shell){
-        forkShell.call(app,shell,name,setting);
+function forkGateway(name,setting,opts){
+    var app = require('cosjs.socket').gateway(setting,opts.emitter);
+    if(opts.shell){
+        forkShell.call(app,opts.shell,name,setting);
     }
 }
 
