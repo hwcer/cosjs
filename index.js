@@ -2,21 +2,23 @@ var cpus = require('os').cpus().length;
 exports = module.exports = require('./lib/cluster');
 exports.library = require('cosjs.library');
 //启动HTTP服务器,num
-exports.http = function(port,shell,fnum){
+exports.http = function(opts){
     if(!arguments.length){
         return require('cosjs.http');
     }
-    if(typeof arguments[0] === 'object'){
-        var opts = arguments[0];
-    }
-    else{
-        var opts = {"port":arguments[0]||80,"shell":arguments[1]||null,"fnum":arguments[2]||0};
-    }
-
     var name = opts['name'] || 'http', fnum = opts['fnum'] || cpus;
-
     for(var i=0;i<fnum;i++){
         exports.fork(name,forkHttp,opts);
+    }
+}
+
+exports.https = function(opts){
+    if(!arguments.length){
+        return require('cosjs.http');
+    }
+    var name = opts['name'] || 'http', fnum = opts['fnum'] || cpus;
+    for(var i=0;i<fnum;i++){
+        exports.fork(name,forkHttps,opts);
     }
 }
 
@@ -44,6 +46,23 @@ function forkHttp(opts){
     }
     app.listen(opts['port']);
 }
+
+function forkHttps(opts){
+    var app = require('cosjs.http')();
+    if(opts['shell']){
+        forkShell.call(app,opts['shell'],opts);
+    }
+    var port = opts['port'];
+    var fs = require('fs');
+    var https = require('https');
+    var privateKey  = fs.readFileSync(opts.pem, 'utf8');
+    var certificate = fs.readFileSync(opts.crt, 'utf8');
+    var credentials = {key: privateKey, cert: certificate};
+    var httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(port);
+}
+
+
 
 function forkSocket(name,setting,opts){
     var app = require('cosjs.socket').socket(opts.root,setting,opts.emitter);
