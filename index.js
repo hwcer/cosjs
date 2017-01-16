@@ -55,8 +55,8 @@ function forkHttps(opts){
     var port = opts['port'];
     var fs = require('fs');
     var https = require('https');
-    var privateKey  = fs.readFileSync(opts.pem, 'utf8');
-    var certificate = fs.readFileSync(opts.crt, 'utf8');
+    var privateKey  = fs.readFileSync(opts.key, 'utf8');
+    var certificate = fs.readFileSync(opts.cert, 'utf8');
     var credentials = {key: privateKey, cert: certificate};
     var httpsServer = https.createServer(credentials, app);
     httpsServer.listen(port);
