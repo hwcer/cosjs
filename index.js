@@ -1,5 +1,5 @@
 var cpus = require('os').cpus().length;
-exports = module.exports = require('./lib/cluster');
+exports = module.exports = require('./cluster');
 exports.library = require('cosjs.library');
 //启动HTTP服务器,num
 exports.http = function(opts){
