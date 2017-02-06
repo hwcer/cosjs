@@ -65,7 +65,7 @@ function forkHttps(opts){
 
 
 function forkSocket(name,setting,opts){
-    var app = require('cosjs.socket').socket(opts.root,setting,opts.emitter);
+    var app = require('cosjs.socket').socket(opts.root,setting,opts.emitter,opts.refresh);
     if(opts.shell){
         forkShell.call(app,opts.shell,name,setting);
     }
@@ -75,7 +75,7 @@ function forkSocket(name,setting,opts){
 }
 
 function forkGateway(name,setting,opts){
-    var app = require('cosjs.socket').gateway(setting,opts.emitter);
+    var app = require('cosjs.socket').gateway(setting,opts.emitter,opts.refresh);
     if(opts.shell){
         forkShell.call(app,opts.shell,name,setting);
     }
