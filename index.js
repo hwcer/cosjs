@@ -16,7 +16,7 @@ exports.https = function(opts){
     if(!arguments.length){
         return require('cosjs.http');
     }
-    var name = opts['name'] || 'http', fnum = opts['fnum'] || cpus;
+    var name = opts['name'] || 'https', fnum = opts['fnum'] || cpus;
     for(var i=0;i<fnum;i++){
         exports.fork(name,forkHttps,opts);
     }
