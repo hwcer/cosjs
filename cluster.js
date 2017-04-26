@@ -150,7 +150,10 @@ function handleMessage(key,arr) {
     }
     var worker = cluster.workers[config.id];
     if(worker){
-        try {  worker.send(JSON.stringify(arr));  }catch (e){
+        try {
+            worker.send(JSON.stringify(arr));
+        }
+        catch (e){
             console.log(e);
         }
     }
