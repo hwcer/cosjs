@@ -169,7 +169,13 @@ function workerMessage(){
     })
 }
 
-function masterMessage(data){
+function masterMessage(){
+    if(arguments.length > 2){
+        var data = arguments[1];
+    }
+    else{
+        var data = arguments[0];
+    }
     var arr = library('json').parse(data);
     if( !Array.isArray(arr)){
         return ;
