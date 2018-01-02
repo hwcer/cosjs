@@ -1,14 +1,15 @@
 ﻿//群集模块
-var util     = require('util');
-var library   = require('cosjs.library');
-var cluster  = require('cluster');
+const util              = require('util');
+const cluster          = require('cluster');
+const cosjs_json       = require('./library/json');
+
 var workers  = [];
 
 process.setMaxListeners(0);
 //添加子进程，handle：function,或者一个脚本路径
 exports.fork = function(name,handle){
     var handleArgs = Array.prototype.slice.call(arguments,2);
-    var handleConfig = {  "id": 0, "name":name, "handle": handle,"handleArgs": handleArgs };
+    var handleConfig = {  "id": 0, "name":name, "handle": handle,"handleArgs": handleArgs,"subscribe":new Set() };
     workers.push(handleConfig);
 }
 
@@ -21,7 +22,6 @@ exports.start = function () {
         workerStart();
     }
 }
-
 
 exports.on = exports.subscribe = function(name,callback){
     if (!cluster.isWorker){
@@ -81,7 +81,7 @@ function workerStart(){
     else{
         method = require(handle);
     }
-    if(typeof method == 'function' ){
+    if(typeof method === 'function' ){
         method.apply(null,config['handleArgs']);
     }
 }
@@ -130,7 +130,12 @@ function forkWorker(key){
 
 
 function publish(arr){
-    process.emit(arr[0],arr);
+    for(let key in workers){
+        let val = workers[key];
+        if( val.subscribe.has(arr[0]) ){
+            handleMessage(key,arr);
+        }
+    }
 }
 
 function subscribe(arr){
@@ -139,7 +144,7 @@ function subscribe(arr){
     if(!config){
         return false;
     }
-    process.on(event,handleMessage.bind(null,key) );
+    config.subscribe.add(event);
 }
 
 
@@ -161,7 +166,7 @@ function handleMessage(key,arr) {
 
 function workerMessage(){
     process.on('message',function(msg){
-        var arr = library('json').parse(msg);
+        var arr = cosjs_json.parse(msg);
         if(!Array.isArray(arr)){
             return;
         }
@@ -176,15 +181,15 @@ function masterMessage(){
     else{
         var data = arguments[0];
     }
-    var arr = library('json').parse(data);
+    var arr = cosjs_json.parse(data);
     if( !Array.isArray(arr)){
         return ;
     }
     var type = arr.shift();
-    if(type=='publish'){
+    if(type==='publish'){
         publish(arr);
     }
-    else if(type=='subscribe'){
+    else if(type==='subscribe'){
         subscribe(arr);
     }
 }

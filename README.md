@@ -13,32 +13,20 @@ Install with:
 Simple example, included as `demo/index.js`:
 
 ```index.js
-    var cosjs = require('../index');
-    var config = require('./config');
-    cosjs.http(config.http);
-    cosjs.socket(config.socket);
+    var cosjs = require('cosjs');
+    var config = require('./develop');
+    cosjs.http(config);
     cosjs.start();
 ```
 
-```config.js
+```develop.js
     var root = __dirname;
     exports = module.exports = {
         debug: 1,
-        cache   : '127.0.0.1:6379',
-        mongodb : '127.0.0.1:27017/test',
+		port     : 80,
+		fnum     : 1,
+		shell    : root+'/process/http',
     }
-
-    exports.http = {
-        'port'    : 80,
-        'root'    : root + '/http',
-        'shell'   : root+'/process/http',
-        'host'    : '127.0.0.1',
-        'worker'  : 0,
-        'static'  : {route:'/',handle: 'wwwroot'},
-        'server'  : [
-            {route:'/api/:m/(*)?',handle:'handle',method:'all',output:'jsonp',subpath:4}
-        ],
-    };
 ```
 
 ## Demo
