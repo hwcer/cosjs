@@ -82,17 +82,21 @@ class cosjs_mongodb{
         }
         return this._MultiColl;
     }
-    //id,key,callback
+    //id,key,dataType,callback
     get(id){
-        var next = 1,key,callback;
+        var next = 1,key,dataType,callback;
         if(typeof arguments[next] !== 'function'){
             key = arguments[next];
+            next ++;
+        }
+        if(typeof arguments[next] !== 'function'){
+            dataType = arguments[next];
             next ++;
         }
         callback = arguments[next];
 
         var query  = this.util.query(id);
-        var option = {"multi":this.util.isMultiWrite(id),"fields":this.util.fields(key),"dataType":"json"};
+        var option = {"multi":this.util.isMultiWrite(id),"fields":this.util.fields(key),"dataType":dataType||"json"};
         this.collection(function(err,coll){
             if(err){
                 return callback(err,coll);
@@ -500,17 +504,7 @@ mongodb_util.prototype.values = function mongodb_util_values(key, val) {
     return value;
 }
 
-mongodb_util.prototype.ObjectID = function mongodb_util_ObjectID(str){
-    if(arguments.length === 0){
-        return mongodb.ObjectID();
-    }
-    else if( typeof str === 'string' && mongodb.ObjectID.isValid(str) ){
-        return mongodb.ObjectID(str);
-    }
-    else{
-        return str;
-    }
-}
+mongodb_util.prototype.ObjectID = mongodb_ObjectID;
 
 mongodb_util.prototype.isMultiWrite = function mongodb_util_isMultiWrite(id) {
     if (!id || typeof id == 'object') {
@@ -554,6 +548,10 @@ function mongodb_callback(err,ret){
     return err ? false : ret;
 }
 
+
+function mongodb_ObjectID(id){
+    return id ? id : mongodb.ObjectID().toString();
+}
 //错误日志
 function mongodb_ErrorLogs(method,query,update,option,error,callback){
     var code = error['code']||0;

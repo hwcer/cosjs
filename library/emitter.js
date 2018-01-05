@@ -1,12 +1,13 @@
 const events = require('events');
 const library  = require('../library');
+const json = library.require("json");
 
 function RedisEmitter(opts,app) {
     if (!(this instanceof RedisEmitter)) {
         return new RedisEmitter(opts,app)
     }
     this.app = app || null;
-    this.loader  = opts.root ? library('loader')(opts.root) : null;
+    this.loader  = opts.root ? library.require('loader')(opts.root) : null;
     this.prefix  = opts.prefix || '_emit'
     this.pattern = opts.pattern ? true : false;
 
@@ -72,7 +73,8 @@ function createRedisClient(opts,type) {
     var key = ['_',type].join('');
     if(!this[key]){
         var redis = require('./redis');
-        this[key] = redis.connect(opts[type]);
+        var duplicate = type === 'sub' ? true : false;
+        this[key] = redis.connect(opts[type],duplicate);
     }
     return this[key];
 }
@@ -82,7 +84,7 @@ function message(name,args) {
     if(!args){
         return;
     }
-    args = library('json').parse(args)
+    args = json.parse(args)
     if(!args){
         return;
     }
@@ -98,7 +100,7 @@ function pmessage(pattern,name,args) {
     if(!args){
         return;
     }
-    args = library('json').parse(args)
+    args = json.parse(args)
     if(!args || !Array.isArray(args)){
         return;
     }

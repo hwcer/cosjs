@@ -10,14 +10,14 @@ exports.md5 = function (str){
 
 //签名
 exports.sign = function (args,secret,length) {
-    var keys = Object.keys(args).sort();
     var arr = [];
-    keys.forEach(function(k){
-        arr.push(k+'='+args[k]);
-    });
+    var keys = Object.keys(args).sort();
+    for(let k of keys){
+        arr.push( k+"="+args[k]);
+    }
     arr.push(secret);
     var str = arr.join('&');
-    return exports.md5(str).substr(0,length||16);
+    return exports.md5(str).substr(0,length||32);
 }
 
 

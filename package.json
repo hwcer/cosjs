@@ -15,14 +15,20 @@
     }
   ],
   "dependencies": {
-    "ejs": "*",
-    "redis": "*",
-	"mongodb": "*",
-    "express": "4.*",
-    "socket.io": "1.4.*"
+    "body-parser": "latest",
+    "cookie-parser": "latest",
+    "ejs": "latest",
+    "express": "latest",
+    "ioredis": "latest",
+    "log4js": "latest",
+    "mongodb": "latest",
+    "node-schedule": "latest",
+    "request": "latest",
+    "socket.io": "latest",
+    "socket.io-client": "latest"
   },
   "engines": {
-    "node": "4.2+"
+    "node": "8.2+"
   },
   "directories": {
     "lib": "./lib/"

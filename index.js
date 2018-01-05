@@ -1,9 +1,10 @@
 const cpus = require('os').cpus().length;
 const cluster = require('./cluster');
 
-exports.pool    = require('./pool');
+exports.pool      = require('./pool');
+exports.fork     = cluster.fork;
 exports.start    = cluster.start;
-exports.cluster = cluster;
+exports.cluster  = cluster;
 
 
 //启动HTTP服务器,num

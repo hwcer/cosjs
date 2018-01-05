@@ -77,10 +77,10 @@ class redis{
 
 }
 
-function redis_connect(opts){
+function redis_connect(opts,duplicate){
     var redis;
     if (  opts instanceof ioredis || opts instanceof (ioredis.Cluster)  ) {
-        redis = opts;
+        redis = duplicate ? opts.duplicate() : opts ;
     }
     else if(Array.isArray(opts)){
         redis = new ioredis.Cluster(opts);
