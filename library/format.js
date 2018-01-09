@@ -35,7 +35,7 @@ module.exports.parse = function (val, type,defaultValue) {
         return (Array.isArray(val)) ? val: (json.parse(val) || defaultValue || null);
     }
     else if (type === 'string') {
-        return (val.toString ? val.toString() : "")||defaultValue||"";
+        return (val && val.toString ? val.toString() : "")||defaultValue||"";
     }
     else if (type === 'time') {
         return val ? new Date(val).getTime() : defaultValue || 0;
