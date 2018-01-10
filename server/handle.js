@@ -115,6 +115,9 @@ function handle_finish(data,code){
 
 
 function handle_callback(server,err,ret) {
+    if(this.develop){
+        console.log("debug:",this.path,err,JSON.stringify(ret))
+    }
     if(typeof server._event_finish === 'function'){
         server._event_finish.call(this,err,ret,handle_finish.bind(this));
     }
