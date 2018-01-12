@@ -67,3 +67,76 @@ base64.prototype.decode = function base64Decode(input, utf8) {
     }
     return o;
 }
+
+
+function RSA2(opts){
+    if (!(this instanceof RSA2)) {
+        return new RSA2(opts)
+    }
+    this.algorithm  = opts['RSA1'] ? "RSA-SHA128" : "RSA-SHA256";
+    this.PublicKey  = RSA2_verify_certificate(opts.PublicKey,'public');
+    this.PrivateKey = RSA2_verify_certificate(opts.PrivateKey,'private');
+}
+
+exports.RSA2 = RSA2;
+
+
+
+RSA2.prototype.sign = function RSA2_sign(params) {
+    var sign;
+    try {
+        let signer = crypto.createSign(this.algorithm);
+        let prestr = RSA2_link_params(params);
+        sign = signer.update(prestr).sign(this.PrivateKey, "base64");
+    }
+    catch(err) {
+        console.log(err)
+        sign = false;
+    }
+    return sign;
+};
+
+RSA2.prototype.verify = function verifySign(params, sign) {
+    var result;
+    try {
+        let verify = crypto.createVerify(this.algorithm);
+        let prestr = RSA2_link_params(params);
+        result = verify.update(prestr).verify(this.PublicKey, sign, "base64");
+    }
+    catch(err) {
+        console.log(err)
+        result = false;
+    }
+    return result;
+}
+
+
+function RSA2_link_params(params) {
+    if(typeof params !== "object"){
+        return params;
+    }
+    var keys = Object.keys(params).sort();
+    var sPara = [];
+    for(let k of keys){
+        if(params[k]){
+            sPara.push( k+"="+params[k]);
+        }
+    }
+    return sPara.join("&");
+}
+
+
+function RSA2_verify_certificate(key,type){
+    if(type === 'private') {
+        var S = "-----BEGIN RSA PRIVATE KEY-----";
+        var E = "-----END RSA PRIVATE KEY-----";
+    }
+    else {
+        var S = "-----BEGIN PUBLIC KEY-----";
+        var E = "-----END PUBLIC KEY-----";
+    }
+    if(key.substr(0,S.length) !== S ){
+        key = S +"\n"+  key +"\n"+ E;
+    }
+    return key.toString();
+}
