@@ -143,6 +143,9 @@ class cosjs_mongodb{
             this.update(query,update,option,callback);
         }
     }
+    add(){
+        return this.insert.apply(this,arguments);
+    }
     incr(id, key,val,callback) {
         callback = callback || mongodb_callback;
         var query  = this.util.query(id);

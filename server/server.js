@@ -2,7 +2,6 @@
 const domain           = require('domain');
 const express          = require('express');
 const cosjs_handle     = require('./handle');
-const cosjs_cluster    = require('../cluster');
 const cosjs_types      = {"get":["query"],"post":["body"],"all":['params','query','body']};
 
 module.exports = function cosjs_server(){

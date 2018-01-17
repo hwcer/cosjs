@@ -6,18 +6,14 @@ function handle(server,req,res,next){
     if (!(this instanceof handle)) {
         return new handle(server,req,res,next);
     }
-    Object.defineProperty(this,'req',{ value: req, writable: false, enumerable: false, configurable: false, });
-    Object.defineProperty(this,'res',{ value: res, writable: false, enumerable: false, configurable: false, });
-    Object.defineProperty(this,'next',{ value: next, writable: false, enumerable: false, configurable: false, });
+    Object.defineProperty(this,'req',     { value: req,  writable: false, enumerable: false, configurable: false, });
+    Object.defineProperty(this,'res',     { value: res,  writable: false, enumerable: false, configurable: false, });
+    Object.defineProperty(this,'next',    { value: next, writable: false, enumerable: false, configurable: false, });
+    Object.defineProperty(this,'get',     { value: handle_getdata.bind(this,server), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'path',    { value: handle_subpath(req.path,server.subpath), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'output',  { value: server.option['output'] || 'html', writable: true, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'callback',{ value: handle_callback.bind(this,server), writable: false, enumerable: true, configurable: false, });
 
-    var path     = handle_subpath(req.path,server.subpath),
-        output   = server.option['output'] || 'html',
-        getdata  = handle_getdata.bind(this,server),
-        callback = handle_callback.bind(this,server);
-    Object.defineProperty(this,'get',{ value: getdata, writable: false, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'path',{ value: path, writable: false, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'output',{ value: output, writable: true, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'callback',{ value: callback, writable: false, enumerable: true, configurable: false, });
     if(server['_session_opts']){
         Object.defineProperty(this,'session',{ value: cosjs_session(req,res,server['_session_opts']), writable: false, enumerable: true, configurable: false, });
     }
