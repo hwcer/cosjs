@@ -111,13 +111,10 @@ route_server.prototype.on = function route_server_on(name,func){
 
 route_server.prototype.session = function route_server_session(opts){
     var session = require('./session');
-    var mergeOpts = Object.assign({},session.config,opts||{});
-    if(mergeOpts['redis']){
-        var redis = require('../library/redis/hash');
-        mergeOpts['redis'] = new redis(mergeOpts.redis,mergeOpts.prefix);
-    }
+    var mergeOpts = Object.assign({},session["config"],opts||{});
     if( !mergeOpts['guid'] && mergeOpts['secret'] ){
-        mergeOpts['crypto'] = session.crypto(mergeOpts.secret,6);
+        var crypto  = require('./crypto');
+        mergeOpts['crypto'] = crypto(mergeOpts.secret,6);
     }
-    Object.defineProperty(this,'_session_opts',{ value: mergeOpts, writable: false, enumerable: false, configurable: false, });
+    Object.defineProperty(this,'_session_options',{ value: mergeOpts, writable: false, enumerable: false, configurable: false, });
 }

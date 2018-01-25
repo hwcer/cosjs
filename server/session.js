@@ -7,21 +7,33 @@
  */
 "use strict";
 
-const cosjs_redis          = require('../../library/redis/hash');
-const cosjs_format          = require('../../library/format').parse;
-const cosjs_ObjectID        = require('../../library/ObjectID');
+const cosjs_redis          = require('../library/redis/hash');
+const cosjs_format          = require('../library/format').parse;
+const cosjs_ObjectID        = require('../library/ObjectID');
 
 const SESSION_KEY    = '_sess';
 const SESSION_LOCK   = '_lock';
 
-module.exports = function(req,res,opts){
-    return new session(req,res,opts);
+module.exports = function(handle,opts){
+    return new session(handle,opts);
 }
 
-module.exports.config = require('./config');
-module.exports.crypto = require('./crypto');
+module.exports.config = {
+    key     : "_sid",                             //session id key
+    guid    : true,                              //使用guid作为session id
+    method  : "cookie",                          //session id 存储方式,get,post,path,cookie
 
-function session(req,res,opts) {
+    level  : 1,                                //安全等级，0:不验证,1:基本验证,2:基本验证+进程锁,3:基本验证+进程锁+数据绝对一致性
+    redis  : null,                             //redis options
+    crypto : null,                              //对称加密方式
+    secret : 'cosjs session',                 //加密字符串
+    prefix : "session",                       //session hash 前缀
+    expire : 86400,                             //有效期,S
+    lockNum : 5,                                //level >=2 ,被锁定时,累计等待次数,超过此值会返回失败
+    lockTime : 200,                             //level >=2 ,被锁定时,每次等待时间
+}
+
+function session(handle,opts) {
     this.sid      = '';    //session id
     this.uid      = '';    // user id
 
@@ -30,30 +42,29 @@ function session(req,res,opts) {
     this._closed   = 0;          //是否已经终止(前端非正常结束)
     this._dataset  = null;       //session 数据
 
-    var redis,crypto = opts.crypto ? opts.crypto : exports.crypto(opts.secret,6);
-    if(typeof opts.redis === 'object' && (opts.redis instanceof cosjs_redis) ){
-        redis = opts.redis;
-    }
-    else {
-        redis = new cosjs_redis(opts.redis,opts.prefix);
-    }
-
     Object.defineProperty(this,'opts',{ value: opts, writable: false, enumerable: false, configurable: false,});
     Object.defineProperty(this,'level',{ value: opts['level'], writable: true, enumerable: true, configurable: false,});
-    Object.defineProperty(this,'redis',{ value:  redis, writable: false, enumerable: true, configurable: false,});
-    Object.defineProperty(this,'crypto',{ value: crypto, writable: false, enumerable: false, configurable: false,});
+    Object.defineProperty(this,'crypto',{ value: opts.crypto, writable: false, enumerable: false, configurable: false,});
 
     //启动session
     this.start = function(callback){
         if(this._dataset){
             throw new Error('session start again');
         }
+
+        var _redis_opts = (typeof opts.redis === 'function') ? opts.redis.call(handle) : opts.redis;
+        if(!_redis_opts){
+            return callback("session","redis empty");
+        }
+        var _redis_hash = new cosjs_redis(_redis_opts,opts.prefix);
+        Object.defineProperty(this,'redis',{ value:  _redis_hash, writable: false, enumerable: true, configurable: false,});
+
         if(this.level >=2) {
             var session_unlock_bind = session_unlock.bind(this);
-            res.on('close',  session_unlock_bind);
-            res.on('finish', session_unlock_bind);
+            handle.res.on('close',  session_unlock_bind);
+            handle.res.on('finish', session_unlock_bind);
         }
-        session_start.call(this,req,res,callback);
+        session_start.call(this,handle.req,handle.res,callback);
     }
     //创建session,登录时使用:uid,data,callback
     this.create = function(){
@@ -66,7 +77,7 @@ function session(req,res,opts) {
         else{
             throw new Error('session create arguments length error');
         }
-        session_create.call(this,req,res,uid,data,callback);
+        session_create.call(this,handle.req,handle.res,uid,data,callback);
     }
 };
 

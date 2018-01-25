@@ -97,7 +97,7 @@ function redis_connect(opts,duplicate){
     }
     if(redis && redis.listenerCount('error') < 1 ){
         redis.on('error',function(err){
-            console.log('redis',opts,err);
+            console.log('redis',err);
         });
     }
     return redis;

@@ -14,8 +14,8 @@ function handle(server,req,res,next){
     Object.defineProperty(this,'output',  { value: server.option['output'] || 'html', writable: true, enumerable: true, configurable: false, });
     Object.defineProperty(this,'callback',{ value: handle_callback.bind(this,server), writable: false, enumerable: true, configurable: false, });
 
-    if(server['_session_opts']){
-        Object.defineProperty(this,'session',{ value: cosjs_session(req,res,server['_session_opts']), writable: false, enumerable: true, configurable: false, });
+    if(server['_session_options']){
+        Object.defineProperty(this,'session',{ value: cosjs_session(this,server['_session_options']), writable: false, enumerable: true, configurable: false, });
     }
 };
 

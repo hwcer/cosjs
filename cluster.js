@@ -19,7 +19,12 @@ exports.start = function () {
         masterStart();
     }
     else if (cluster.isWorker) {
-        workerStart();
+        if(typeof arguments[0] === "function"){
+            arguments[0](workerStart);
+        }
+        else {
+            workerStart();
+        }
     }
 }
 
