@@ -13,13 +13,25 @@ exports.sign = function (args,secret,length) {
     var arr = [];
     var keys = Object.keys(args).sort();
     for(let k of keys){
-        arr.push( k+"="+args[k]);
+        var v = formatSignValue(args[k]);
+        arr.push( k+"="+v);
     }
     arr.push(secret);
     var str = arr.join('&');
     return exports.md5(str).substr(0,length||32);
 }
 
+function formatSignValue(v){
+    if(Array.isArray(v)){
+        return v.join(",");
+    }
+    else if(typeof v === "object"){
+        return JSON.stringify(v);
+    }
+    else {
+        return v;
+    }
+}
 
 function base64(map){
     if (!(this instanceof base64)) {
