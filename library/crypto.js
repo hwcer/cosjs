@@ -86,8 +86,13 @@ function RSA2(opts){
         return new RSA2(opts)
     }
     this.algorithm  = opts['RSA1'] ? "RSA-SHA128" : "RSA-SHA256";
-    this.PublicKey  = RSA2_verify_certificate(opts.PublicKey,'public');
-    this.PrivateKey = RSA2_verify_certificate(opts.PrivateKey,'private');
+    if(opts.PublicKey){
+        this.PublicKey  = RSA2_verify_certificate(opts.PublicKey,'public');
+    }
+    if(opts.PrivateKey){
+        this.PrivateKey = RSA2_verify_certificate(opts.PrivateKey,'private');
+    }
+
 }
 
 exports.RSA2 = RSA2;
@@ -95,6 +100,9 @@ exports.RSA2 = RSA2;
 
 
 RSA2.prototype.sign = function RSA2_sign(params) {
+    if(!this.PrivateKey){
+        throw new Error("RSA2.sign PrivateKey empty");
+    }
     var sign;
     try {
         let signer = crypto.createSign(this.algorithm);
@@ -109,6 +117,9 @@ RSA2.prototype.sign = function RSA2_sign(params) {
 };
 
 RSA2.prototype.verify = function verifySign(params, sign) {
+    if(!this.PublicKey){
+        throw new Error("RSA2.sign PublicKey empty");
+    }
     var result;
     try {
         let verify = crypto.createVerify(this.algorithm);
