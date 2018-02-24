@@ -1,6 +1,6 @@
 ﻿"use strict";
 const cosjs_format          = require('../library/format').parse;
-const cosjs_session           = require('./session');
+const cosjs_session         = require('./session');
 
 function handle(server,req,res,next){
     if (!(this instanceof handle)) {
@@ -74,11 +74,11 @@ handle.prototype.redirect = function(url){
     this.res.redirect(url);
 }
 //获取参数
-function handle_getdata(server, key, type) {
-    var dataset = server.dataset;
-    var v = null ;
+function handle_getdata(server, key, type, dataset) {
+    dataset = dataset || server.dataset;
+    let v = null ;
     for(let k of dataset){
-        var d = this.req[k]||{};
+        let d = this.req[k]||{};
         if(key in d){
             v = d[key];
             break;
@@ -92,6 +92,9 @@ function handle_getdata(server, key, type) {
 
 
 function handle_finish(data,code){
+    if(this.res.finished){
+        return ;
+    }
     if(code){
         this.res.status(code);
     }

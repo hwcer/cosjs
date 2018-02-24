@@ -51,7 +51,7 @@ Relative.prototype.roll = function(){
     if(!this.total){
         return false;
     }
-    this.items.sort(()=>0.5 - Math.random() );
+    //this.items.sort(()=>0.5 - Math.random() );
     let ret=false,total = Math.floor(this.total),random = exports.Roll(1,total);
 
     for(let i=0;i<this.items.length;i++){

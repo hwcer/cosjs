@@ -15,17 +15,13 @@
     }
   ],
   "dependencies": {
-    "body-parser": "latest",
-    "cookie-parser": "latest",
-    "ejs": "latest",
-    "express": "latest",
-    "ioredis": "latest",
-    "log4js": "latest",
-    "mongodb": "latest",
-    "node-schedule": "latest",
-    "request": "latest",
-    "socket.io": "latest",
-    "socket.io-client": "latest"
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.2",
+    "ioredis": "^3.2.2",
+    "mongodb": "^3.0.1",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4"
   },
   "engines": {
     "node": "8.2+"

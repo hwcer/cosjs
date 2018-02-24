@@ -6,12 +6,10 @@ module.exports = function(opts){
     var app = this;
     var root = opts['root'] + '/handle';
     var route = {route:"*",method:'all',output:'json'}
-
-    console.log(root);
     var server = app.server(root,route,cookie());
     server.on('start',serverHandleStart);
     server.on('finish', serverHandleFinish);
-    server.session({redis:"127.0.0.1",guid:false});
+    server.session(opts.session);
 };
 
 

@@ -9,10 +9,10 @@
 
 const cosjs_redis          = require('../library/redis/hash');
 const cosjs_format          = require('../library/format').parse;
-const cosjs_ObjectID        = require('../library/ObjectID');
 
-const SESSION_KEY    = '_sess';
-const SESSION_LOCK   = '_lock';
+const SESSION_KEY    = '$SKey';
+const SESSION_LOCK   = '$SLock';
+const SESSION_TIME   = '$STime';
 
 module.exports = function(handle,opts){
     return new session(handle,opts);
@@ -20,7 +20,6 @@ module.exports = function(handle,opts){
 
 module.exports.config = {
     key     : "_sid",                             //session id key
-    guid    : true,                              //使用guid作为session id
     method  : "cookie",                          //session id 存储方式,get,post,path,cookie
 
     level  : 1,                                //安全等级，0:不验证,1:基本验证,2:基本验证+进程锁,3:基本验证+进程锁+数据绝对一致性
@@ -48,10 +47,9 @@ function session(handle,opts) {
 
     //启动session
     this.start = function(callback){
-        if(this._dataset){
+        if( this.redis ){
             throw new Error('session start again');
         }
-
         var _redis_opts = (typeof opts.redis === 'function') ? opts.redis.call(handle) : opts.redis;
         if(!_redis_opts){
             return callback("session","redis empty");
@@ -59,25 +57,41 @@ function session(handle,opts) {
         var _redis_hash = new cosjs_redis(_redis_opts,opts.prefix);
         Object.defineProperty(this,'redis',{ value:  _redis_hash, writable: false, enumerable: true, configurable: false,});
 
+        if(this.level < 1){
+            return callback(null,null);
+        }
         if(this.level >=2) {
             var session_unlock_bind = session_unlock.bind(this);
             handle.res.on('close',  session_unlock_bind);
             handle.res.on('finish', session_unlock_bind);
         }
-        session_start.call(this,handle.req,handle.res,callback);
+        this.sid = handle.get(opts["key"],"string",opts["_query"]);
+        session_start.call(this,callback);
     }
     //创建session,登录时使用:uid,data,callback
-    this.create = function(){
-        if(opts.guid){
-            var uid = null,data=arguments[0],callback=arguments[1];
+    this.create = function(uid,data,callback){
+        this.uid = uid;
+        this.sid = this.crypto.encode(uid);
+
+        var newData = Object.assign({},data);
+        newData[SESSION_KEY]  = this.sid;
+        newData[SESSION_LOCK] = 0;
+        newData[SESSION_TIME] = Date.now();
+        this.redis.multi();
+        this.redis.set(this.uid,newData,null);
+        if(this.opts.expire){
+            this.redis.expire(this.uid,this.opts.expire);
         }
-        else if(arguments.length >=3){
-            var uid = arguments[0],data=arguments[1],callback=arguments[2];
-        }
-        else{
-            throw new Error('session create arguments length error');
-        }
-        session_create.call(this,handle.req,handle.res,uid,data,callback);
+        this.redis.save((err,ret)=>{
+            if(err){
+                return callback(err,ret);
+            }
+            if( !this.opts.method || ["cookie","all"].indexOf(this.opts.method) >=0 ){
+                handle.res.cookie(this.opts.key, this.sid, {});
+            }
+            this._locked = 0;
+            return callback(null,this.sid);
+        });
     }
 };
 
@@ -98,6 +112,7 @@ session.prototype.set = function (key,val) {
         return callback('logout','session uid empty');
     }
     this._dataset[key] = val;
+    this.redis.multi();
     this.redis.set(this.uid,key,val);
 };
 //删除一个或者多个在session中缓存的信息，keys==null,删除所有信息，退出登录
@@ -106,21 +121,11 @@ session.prototype.del = function(key,callback){
 };
 
 
-function session_start(req,res,callback){
-    if(this.level < 1){
-        return callback(null,null);
-    }
-    this.sid = get_session_id.call(this,req,res);
+function session_start(callback){
     if( !this.sid ){
         return callback('logout','session id[' + this.opts.key + '] empty');
     }
-
-    if(this.opts.guid){
-        this.uid = this.sid;
-    }
-    else{
-        this.uid = this.crypto.decode(this.sid);
-    }
+    this.uid = this.crypto.decode(this.sid);
     if( !this.uid ){
         return callback('logout','sid error');
     }
@@ -128,8 +133,8 @@ function session_start(req,res,callback){
         if (err) {
             return callback(err, ret);
         }
-        var ret_sid = ret[SESSION_KEY]||'';
-        var ret_lock = parseInt(ret[SESSION_LOCK]||0);
+        let ret_sid = ret[SESSION_KEY]||'';
+        let ret_lock = parseInt(ret[SESSION_LOCK]||0);
         if ( !ret_sid || this.sid !== ret_sid) {
             return callback("logout", "session id illegal");
         }
@@ -144,24 +149,6 @@ function session_start(req,res,callback){
         }
     });
 };
-
-function get_session_id(req,res){
-    var val=null,skey = this.opts.key;
-    var reqDataName = {'cookie':'cookies','get':'query','post':'body','path':'params'};
-    var keys = this.opts.method ? [this.opts.method] : Object.keys(reqDataName);
-    for(let k of keys){
-        if(!reqDataName[k]){
-            throw new Error('session opts[method] value "'+k+'" is not a valid value');
-        }
-        var name = reqDataName[k];
-        if(req[name] && (skey in req[name])){
-            val = req[name][skey];
-            break;
-        }
-    }
-    return val;
-}
-
 
 function get_session_data(callback){
     this.redis.get(this.uid, null,  (err, ret)=> {
@@ -229,50 +216,20 @@ function session_result(callback){
 
 
 
-function session_create(req,res,uid,data,callback) {
-    if(this.opts.guid){
-        this.uid = this.sid = cosjs_ObjectID().toString();
-    }
-    else{
-        this.uid = uid;
-        this.sid = this.crypto.encode(uid);
-    }
-
-    var newData = Object.assign({},data);
-    newData[SESSION_KEY]  = this.sid;
-    newData[SESSION_LOCK] = 0;
-    this.redis.multi();
-    this.redis.set(this.uid,newData,null);
-    if(this.opts.expire){
-        this.redis.expire(this.uid,this.opts.expire);
-    }
-    this.redis.save((err,ret)=>{
-        if(err){
-            return callback(err,ret);
-        }
-        if( !this.opts.method || this.opts.method.indexOf('cookie') >=0 ){
-            res.cookie(this.opts.key, this.sid, {});
-        }
-        this._locked = 0;
-        return callback(null,this.sid);
-    });
-}
 
 function session_unlock(){
+    if( !this.uid ){
+        return false;
+    }
     this._closed = 1;
-    if( !this._locked ){
-        return false;
-    }
-    this._locked = 0;
-    if(!this.uid){
-        return false;
-    }
     session_reset.call(this);
 };
 
 function session_aborted(callback){
-    if(this._locked && this.uid){
-        this._locked = 0;
+    if( !this.uid ){
+        return false;
+    }
+    if(this._locked){
         session_reset.call(this);
     }
     return callback("aborted");
@@ -280,11 +237,16 @@ function session_aborted(callback){
 
 function session_reset(){
     this.redis.multi();
-    this.redis.set(this.uid,SESSION_LOCK,0);
-    this.redis.expire(this.uid,this.opts.expire);
-    this.redis.save(function(err,ret){
-        //console.log('session_reset',err,ret);
-    });
+    if(this._locked){
+        this._locked = 0;
+        this.redis.set(this.uid,SESSION_LOCK,0);
+    }
+    let $NTime = Date.now();
+    let $STime = this.get(SESSION_TIME)||0;
+    if( this.opts.expire > 0 && ($NTime - $STime) > (this.opts.expire / 2) ){
+        this.redis.expire(this.uid,this.opts.expire);
+    }
+    this.redis.save();
 }
 
 

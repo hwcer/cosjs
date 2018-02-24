@@ -2,7 +2,7 @@
 const domain           = require('domain');
 const express          = require('express');
 const cosjs_handle     = require('./handle');
-const cosjs_types      = {"get":["query"],"post":["body"],"all":['params','query','body']};
+const cosjs_types      = {"get":["query"],"post":["body"],"cookie":["cookies"],"all":['params','query','body','cookies']};
 
 module.exports = function cosjs_server(){
     var app = express();
@@ -96,8 +96,8 @@ function route_server(root,option){
     this.loader    = require('../library/loader')(root);
     this.subpath   = option.subpath ||0;                 //截取req.path.substr(subpath)   req.path.substr(subpath[0],subpath[1])为handle路径
     //用户数据集合
-    var m   = option['method'];
-    this.dataset = cosjs_types[m] || cosjs_types['all'];
+    let method   = option['method'];
+    this.dataset = cosjs_types[method] || cosjs_types['all'];
 }
 
 route_server.prototype.on = function route_server_on(name,func){
@@ -110,11 +110,14 @@ route_server.prototype.on = function route_server_on(name,func){
 }
 
 route_server.prototype.session = function route_server_session(opts){
-    var session = require('./session');
-    var mergeOpts = Object.assign({},session["config"],opts||{});
-    if( !mergeOpts['guid'] && mergeOpts['secret'] ){
-        var crypto  = require('./crypto');
-        mergeOpts['crypto'] = crypto(mergeOpts.secret,6);
-    }
+    let crypto  = require('./crypto');
+    let session = require('./session');
+    let mergeOpts = Object.assign({},session["config"],opts||{});
+
+    mergeOpts['crypto'] = crypto(mergeOpts.secret);
+
+    let method   = mergeOpts['method']||"";
+    mergeOpts["_query"] = cosjs_types[method] || cosjs_types['all'];
+
     Object.defineProperty(this,'_session_options',{ value: mergeOpts, writable: false, enumerable: false, configurable: false, });
 }
