@@ -12,7 +12,6 @@ const cosjs_format          = require('../library/format').parse;
 
 const SESSION_KEY    = '$SKey';
 const SESSION_LOCK   = '$SLock';
-const SESSION_TIME   = '$STime';
 
 module.exports = function(handle,opts){
     return new session(handle,opts);
@@ -50,18 +49,21 @@ function session(handle,opts) {
         if( this.redis ){
             throw new Error('session start again');
         }
-        var _redis_opts = (typeof opts.redis === 'function') ? opts.redis.call(handle) : opts.redis;
+        let _redis_opts = (typeof opts.redis === 'function') ? opts.redis.call(handle) : opts.redis;
         if(!_redis_opts){
             return callback("session","redis empty");
         }
-        var _redis_hash = new cosjs_redis(_redis_opts,opts.prefix);
+        let _redis_format = opts["format"]||{};
+        _redis_format[SESSION_KEY] = {"type":"string","value":""}
+        _redis_format[SESSION_LOCK] = {"type":"int","value":0}
+        let _redis_hash = new cosjs_redis(_redis_opts,opts.prefix,_redis_format);
         Object.defineProperty(this,'redis',{ value:  _redis_hash, writable: false, enumerable: true, configurable: false,});
 
         if(this.level < 1){
             return callback(null,null);
         }
         if(this.level >=2) {
-            var session_unlock_bind = session_unlock.bind(this);
+            let session_unlock_bind = session_unlock.bind(this);
             handle.res.on('close',  session_unlock_bind);
             handle.res.on('finish', session_unlock_bind);
         }
@@ -76,7 +78,6 @@ function session(handle,opts) {
         var newData = Object.assign({},data);
         newData[SESSION_KEY]  = this.sid;
         newData[SESSION_LOCK] = 0;
-        newData[SESSION_TIME] = Date.now();
         this.redis.multi();
         this.redis.set(this.uid,newData,null);
         if(this.opts.expire){
@@ -134,7 +135,7 @@ function session_start(callback){
             return callback(err, ret);
         }
         let ret_sid = ret[SESSION_KEY]||'';
-        let ret_lock = parseInt(ret[SESSION_LOCK]||0);
+        let ret_lock = ret[SESSION_LOCK]||0;
         if ( !ret_sid || this.sid !== ret_sid) {
             return callback("logout", "session id illegal");
         }
@@ -229,21 +230,18 @@ function session_aborted(callback){
     if( !this.uid ){
         return false;
     }
-    if(this._locked){
-        session_reset.call(this);
-    }
+    session_reset.call(this);
     return callback("aborted");
 }
 
 function session_reset(){
-    this.redis.multi();
-    if(this._locked){
-        this._locked = 0;
-        this.redis.set(this.uid,SESSION_LOCK,0);
+    if(!this._locked){
+        return false;
     }
-    let $NTime = Date.now();
-    let $STime = this.get(SESSION_TIME)||0;
-    if( this.opts.expire > 0 && ($NTime - $STime) > (this.opts.expire / 2) ){
+    this._locked = 0;
+    this.redis.multi();
+    this.redis.set(this.uid,SESSION_LOCK,0);
+    if( this.opts.expire > 0 ){
         this.redis.expire(this.uid,this.opts.expire);
     }
     this.redis.save();
