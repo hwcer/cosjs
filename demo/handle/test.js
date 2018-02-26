@@ -1,5 +1,5 @@
 exports = module.exports = function(){
-    this.session.set("foo",Date.now());
+    //this.session.set("foo",Date.now());
 
 
     return this.success({

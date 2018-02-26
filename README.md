@@ -15,7 +15,7 @@ Simple example, included as `demo/index.js`:
 ```index.js
     var cosjs = require('cosjs');
     var config = require('./develop');
-    cosjs.http(config);
+    cosjs.server(config);
     cosjs.start();
 ```
 
