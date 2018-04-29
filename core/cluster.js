@@ -1,4 +1,5 @@
-﻿//群集模块
+﻿"use strict";
+//群集模块
 const util              = require('util');
 const cluster          = require('cluster');
 
@@ -172,7 +173,7 @@ function handleMessage(key,arr) {
 
 function workerMessage(){
     process.on('message',function(msg){
-        var arr = jsonParse(msg);
+        var arr = JSON.tryParse(msg);
         if(!Array.isArray(arr)){
             return;
         }
@@ -187,7 +188,7 @@ function masterMessage(){
     else{
         var data = arguments[0];
     }
-    var arr = jsonParse(data);
+    var arr = JSON.tryParse(data);
     if( !Array.isArray(arr)){
         return ;
     }
@@ -198,18 +199,4 @@ function masterMessage(){
     else if(type==='subscribe'){
         subscribe(arr);
     }
-}
-
-function jsonParse(text,reviver){
-    if( !text || typeof text == 'object'){
-        return text;
-    }
-    var json = null;
-    try {
-        json = JSON.parse(text,reviver);
-    }
-    catch(e){
-        json = null;
-    }
-    return json;
 }

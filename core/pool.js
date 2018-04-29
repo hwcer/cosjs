@@ -1,5 +1,5 @@
 ﻿"use strict";
-const library = require('cosjs.library');
+const library = require('../library');
 
 var pool_connect  = {};
 
