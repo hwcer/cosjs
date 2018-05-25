@@ -299,7 +299,7 @@ class cosjs_mongodb{
             return callback('MongoError','mongodb.update use multi but set upsert or fields');
         }
         if(option['upsert'] && typeof this.setOnInsert === 'function' ){
-            option["$setOnInsert"] = this.setOnInsert();
+            option["$setOnInsert"] = this.setOnInsert(query,update);
         }
 
         if( option['upsert'] && option["$setOnInsert"] ){
