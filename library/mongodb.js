@@ -86,7 +86,17 @@ class cosjs_mongodb{
         callback = arguments[next];
 
         let query  = this.util.query(id);
-        let option = {"multi":this.util.isMulti(id),"fields":this.util.fields(key),"dataType":dataType||"json"};
+        let option = {"multi":this.util.isMulti(id),"fields":this.util.fields(key)};
+        if(typeof dataType === "object"){
+            Object.assign(option,dataType)
+            if(!option["dataType"]){
+                option["dataType"] = "json";
+            }
+        }
+        else{
+            option["dataType"] = dataType||"json";
+        }
+
         this.collection(function(err,coll){
             if(err){
                 return callback(err,coll);
@@ -449,7 +459,7 @@ function mongodb_multiResult(option,callback,err,ret){
         getArrFromCursor(ret,callback);
     }
     else if(dataType === 'json' || dataType === 'object'){
-        getObjFromCursor(ret, callback);
+        getObjFromCursor(ret, option,callback);
     }
     else {
         callback(err,ret);
@@ -470,8 +480,8 @@ function getArrFromCursor(cursor,callback){
     cursor.toArray(callback);
 }
 
-function getObjFromCursor(cursor,callback){
-    let key =  '_id',rows = {};
+function getObjFromCursor(cursor,option,callback){
+    let key =  option["key"] || '_id',rows = {};
     cursor.each(function(err,ret){
         if(err){
             return callback(err,ret);
@@ -480,7 +490,7 @@ function getObjFromCursor(cursor,callback){
             return callback(null,rows);
         }
         else{
-            let id = ret[key].toString();
+            let id = ret[key];
             rows[id] = ret;
         }
     });
