@@ -29,17 +29,15 @@ handle.prototype.status = function(code){
 
 handle.prototype.error = function(){
     let err,ret;
-    if(arguments.length == 0 ){
-        err = 'error',ret = 'unknown';
+    if(arguments.length < 2){
+        err = 'error';ret = arguments[0] || 'unknown';
     }
-    else if(arguments.length === 1 && typeof arguments[0] === "object"){
-        err = arguments[0];ret = '';
-    }
-    else if(arguments.length === 1){
-        err = 'error';ret = arguments[0];
-    }
-    else{
+    else if(arguments.length < 3){
         err = arguments[0],ret = arguments[1];
+    }
+    else {
+        let arr = Array.from(arguments);
+        err = arr.shift(),ret = arr;
     }
     this.callback(err,ret);
     return false;

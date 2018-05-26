@@ -19,6 +19,15 @@ if (!Object.values) {
     }
 }
 
+if (!Array.parseInt) {
+    Array.parseInt = function(arr) {
+        let ret=[];
+        for(let v of arr){
+            ret.push(parseInt(v))
+        }
+        return ret;
+    }
+}
 
 JSON.tryParse = function json_parse(text,reviver){
     if( !text || typeof text == 'object'){
