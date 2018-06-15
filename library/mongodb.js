@@ -209,7 +209,7 @@ class cosjs_mongodb{
         ErrorReNum = ErrorReNum || 0;
         ErrorReNum++;
 
-        this.collection(function(err,coll){
+        this.collection((err,coll)=>{
             if(err){
                 return callback(err,coll);
             }
@@ -265,7 +265,7 @@ class cosjs_mongodb{
     }
 
     count(query,callback){
-        this.collection(function(err,coll){
+        this.collection((err,coll)=>{
             if(err){
                 return callback(err,coll);
             }
@@ -278,7 +278,7 @@ class cosjs_mongodb{
             option['fields'] = {};
         }
         let result = mongodb_multiResult.bind(this,option,callback);
-        this.collection(function(err,coll){
+        this.collection((err,coll)=>{
             if(err){
                 return callback(err,coll);
             }
@@ -321,7 +321,7 @@ class cosjs_mongodb{
         }
 
 
-        this.collection(function(err,coll){
+        this.collection((err,coll)=>{
             if(err){
                 return callback(err,coll);
             }
@@ -341,7 +341,7 @@ class cosjs_mongodb{
 
     aggregate(pipeline, options, callback){
         let result = mongodb_multiResult.bind(this,options,callback);
-        this.collection(function(err,coll){
+        this.collection((err,coll)=>{
             if(err){
                 return callback(err,coll);
             }
