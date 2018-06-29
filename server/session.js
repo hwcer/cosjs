@@ -6,7 +6,7 @@
  *
  */
 "use strict";
-const cosjs_lib            = require('../library');
+const cosjs_lib             = require('cosjs.library');
 const cosjs_redis           = cosjs_lib.require('redis').hash;
 const cosjs_format          = cosjs_lib.require('format').parse;
 

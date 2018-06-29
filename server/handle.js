@@ -1,22 +1,22 @@
 ﻿"use strict";
-const cosjs_lib            = require('../library');
-const cosjs_types           = {"get":["query"],"post":["body"],"cookie":["cookies"],"all":['params','query','body','cookies']};
-const cosjs_format          = cosjs_lib.require('format').parse;
 const cosjs_session         = require('./session');
+const cosjs_library         = require('cosjs.library');
+const cosjs_types           = {"get":["query"],"post":["body"],"cookie":["cookies"],"all":['params','query','body','cookies']};
 
-function handle(server,req,res){
+
+function handle(app,req,res){
     if (!(this instanceof handle)) {
-        return new handle(server,req,res);
+        return new handle(app,req,res);
     }
+    Object.defineProperty(this,'app',     { value: app, writable: false, enumerable: false, configurable: false, });
     Object.defineProperty(this,'req',     { value: req,  writable: false, enumerable: false, configurable: false, });
     Object.defineProperty(this,'res',     { value: res,  writable: false, enumerable: false, configurable: false, });
-    Object.defineProperty(this,'server',  { value: server, writable: false, enumerable: false, configurable: false, });
-    Object.defineProperty(this,'get',     { value: handle_getdata.bind(this,server), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'get',     { value: handle_getdata.bind(this,app), writable: false, enumerable: true, configurable: false, });
     Object.defineProperty(this,'path',    { value: handle_subpath.call(this), writable: false, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'output',  { value: server.option['output'] || 'html', writable: true, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'callback',{ value: handle_callback.bind(this,server), writable: false, enumerable: true, configurable: false, });
-    if(server['_session_options']){
-        Object.defineProperty(this,'session',{ value: cosjs_session(this,server['_session_options']), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'output',  { value: app.option['output'] || 'html', writable: true, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'callback',{ value: handle_callback.bind(this,app), writable: false, enumerable: true, configurable: false, });
+    if(app['_session_options']){
+        Object.defineProperty(this,'session',{ value: cosjs_session(this,app['_session_options']), writable: false, enumerable: true, configurable: false, });
     }
 };
 
@@ -49,20 +49,20 @@ handle.prototype.success = function(){
 }
 
 handle.prototype.binary= function (name, data) {
-    var arr = name.split('.');
+    let arr = name.split('.');
     this.res.type(arr[1] || 'html');
     this.res.set("Content-Length", data.length);
-    var filename = encodeURI(arr[0]) + '.'+arr[1];
+    let filename = encodeURI(arr[0]) + '.'+arr[1];
     this.res.set("Content-Disposition", "attachment; filename=" + filename);
     this.res.send(data);
 }
 
 handle.prototype.render = function(data,view){
     view = view || this.view || this.path;
-    var len = view.length;
-    var sub0 = view[0] === '/' ? 1 :0;
-    var sub1 = view[len-1] ==='/' ? (len - 1 - sub0) : (len - sub0);
-    var path = view.substr(sub0,sub1);
+    let len = view.length;
+    let sub0 = view[0] === '/' ? 1 :0;
+    let sub1 = view[len-1] ==='/' ? (len - 1 - sub0) : (len - sub0);
+    let path = view.substr(sub0,sub1);
     this.res.render(path,data,(err,ret)=>{
         if(err){
             this.res.end(err.message || err.stack || err.toString() );
@@ -89,7 +89,7 @@ function handle_getdata(server, key, type, method) {
         }
     }
     if ( v!==null && type) {
-        v = cosjs_format(v, type);
+        v = cosjs_library('format/parse',v, type);
     }
     return v;
 };
@@ -102,7 +102,7 @@ function handle_finish(data,code){
     if(code){
         this.res.status(code);
     }
-    var output = this.output;
+    let output = this.output;
     if(output ==='view'){
         return this.render(data);
     }
@@ -121,7 +121,7 @@ function handle_finish(data,code){
 }
 
 
-function handle_callback(server,error,ret) {
+function handle_callback(app,error,ret) {
     let err;
     if(error && (error instanceof Error) ){
         err = error.message;ret = process.env.NODE_ENV === "production" ? error.code : error.stack;
@@ -136,8 +136,8 @@ function handle_callback(server,error,ret) {
         ret = String(ret);
     }
 
-    if(typeof server._event_finish === 'function'){
-        server._event_finish.call(this,err,ret,handle_finish.bind(this));
+    if(typeof app._event_finish === 'function'){
+        app._event_finish.call(this,err,ret,handle_finish.bind(this));
     }
     else{
         var data = {"err":err,"ret":ret||''};
@@ -146,7 +146,7 @@ function handle_callback(server,error,ret) {
 }
 
 function handle_subpath(){
-    let path,subpath = this.server.subpath;
+    let path,subpath = this.app.subpath;
     if(typeof subpath === 'function'){
         path = subpath.call(this);
     }

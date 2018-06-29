@@ -1,13 +1,12 @@
 "use strict";
 const cpus    = require('os').cpus().length;
-const cluster = require('./core/cluster');
+const cluster = require('./lib/cluster');
 
 exports.fork = cluster.fork;
 exports.start = cluster.start;
 
-exports.pool       = require('./core/pool');
-exports.cluster   = cluster;
-exports.library   = require('./library');
+exports.pool       = require('./lib/pool');
+exports.cluster    = cluster;
 //启动HTTP服务器,num
 exports.http = function(opts){
     let server = require('./server');

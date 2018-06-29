@@ -2,32 +2,32 @@
 const server = require('./server');
 
 exports.http = function http(opts){
-    var app = server();
+    let app = server();
     if(opts['shell']){
         shell.apply(app,arguments);
     }
-    var port = opts['port'] || 80;
+    let port = opts['port'] || 80;
     app.listen(port);
 }
 
 exports.https = function https(opts){
-    var app = server();
+    let app = server();
     if(opts['shell']){
         shell.apply(app,arguments);
     }
-    var fs = require('fs');
-    var https = require('https');
-    var key  = fs.readFileSync(opts['key'], 'utf8');
-    var cert = fs.readFileSync(opts['cert'], 'utf8');
-    var credentials = {"key": key, "cert": cert};
-    var httpsServer = https.createServer(credentials, app);
-    var port = opts['port'] || 443;
+    let fs = require('fs');
+    let https = require('https');
+    let key  = fs.readFileSync(opts['key'], 'utf8');
+    let cert = fs.readFileSync(opts['cert'], 'utf8');
+    let credentials = {"key": key, "cert": cert};
+    let httpsServer = https.createServer(credentials, app);
+    let port = opts['port'] || 443;
     httpsServer.listen(port);
 }
 
 function shell(opts){
-    var method = null;
-    var handle = opts['shell'];
+    let method = null;
+    let handle = opts['shell'];
     if(typeof handle == 'function' ){
         method = handle;
     }
