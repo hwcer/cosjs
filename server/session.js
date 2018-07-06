@@ -78,7 +78,7 @@ function session(handle,opts) {
         if( !this.sid ){
             return callback('logout','session id[' + opts["key"] + '] empty');
         }
-        this.guid = handle.server.crypto.decode(this.sid);
+        this.guid = handle.app.crypto.decode(this.sid);
         if( !this.guid ){
             return callback('logout','sid error');
         }
@@ -86,7 +86,7 @@ function session(handle,opts) {
     }
     //创建session,登录时使用:uid,data,callback
     this.create = function(guid,data,callback){
-        this.sid = handle.server.crypto.encode(guid);
+        this.sid = handle.app.crypto.encode(guid);
         this.guid = guid;
 
         var newData = Object.assign({},data);
