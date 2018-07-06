@@ -78,8 +78,8 @@ function events_start(func,err,ret){
     if(err){
         return this.error(err,ret);
     }
-    if(typeof this.server._event_start === 'function'){
-        this.server._event_start.call(this,handle_start.bind(this,func));
+    if(typeof this.app._event_start === 'function'){
+        this.app._event_start.call(this,handle_start.bind(this,func));
     }
     else{
         handle_start.call(this,func);
