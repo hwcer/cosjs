@@ -34,7 +34,7 @@ module.exports.config = {
 
 function session(handle,opts) {
     this.sid       = '';    //session id
-    this.guid      = '';    // user id
+    this.uid      = '';    // user id
     this._delay    = 0;
     this._locked   = 0;
     this._closed   = 0;          //是否已经终止(前端非正常结束)
@@ -78,24 +78,24 @@ function session(handle,opts) {
         if( !this.sid ){
             return callback('logout','session id[' + opts["key"] + '] empty');
         }
-        this.guid = handle.app.crypto.decode(this.sid);
-        if( !this.guid ){
+        this.uid = handle.app.crypto.decode(this.sid);
+        if( !this.uid ){
             return callback('logout','sid error');
         }
         get_session_data.call(this,session_start.bind(this,callback));
     }
     //创建session,登录时使用:uid,data,callback
-    this.create = function(guid,data,callback){
-        this.sid = handle.app.crypto.encode(guid);
-        this.guid = guid;
+    this.create = function(uid,data,callback){
+        this.sid = handle.app.crypto.encode(uid);
+        this.uid = uid;
 
         var newData = Object.assign({},data);
         newData[SESSION_KEY]  = this.sid;
         newData[SESSION_LOCK] = 0;
         this.redis.multi();
-        this.redis.set(this.guid,newData,null);
+        this.redis.set(this.uid,newData,null);
         if(this.opts.expire){
-            this.redis.expire(this.guid,this.opts.expire);
+            this.redis.expire(this.uid,this.opts.expire);
         }
         this.redis.save((err,ret)=>{
             if(err){
@@ -123,7 +123,7 @@ session.prototype.get = function (key,type) {
 };
 //写入数据，不会修改session,可用于临时缓存
 session.prototype.set = function (key,val) {
-    if(!this.guid){
+    if(!this.uid){
         return false;
     }
     this.redis.multi();
@@ -132,17 +132,17 @@ session.prototype.set = function (key,val) {
         for(let k in key){
             let v = key[k];
             this._dataset[k] = v;
-            this.redis.set(this.guid,k,v);
+            this.redis.set(this.uid,k,v);
         }
     }
     else{
         this._dataset[key] = val;
-        this.redis.set(this.guid,key,val);
+        this.redis.set(this.uid,key,val);
     }
 };
 //删除一个或者多个在session中缓存的信息，keys==null,删除所有信息，退出登录
 session.prototype.del = function(key,callback){
-    this.redis.del(this.guid,key,callback);
+    this.redis.del(this.uid,key,callback);
 };
 
 
@@ -167,7 +167,7 @@ function session_start(callback,err,ret){
 };
 
 function get_session_data(callback){
-    this.redis.get(this.guid, null,  (err, ret)=> {
+    this.redis.get(this.uid, null,  (err, ret)=> {
         if (err) {
             return callback(err, ret);
         }
@@ -186,7 +186,7 @@ function session_lock(callback){
     if(this._closed){
         return session_aborted.call(this,callback);
     }
-    this.redis.incr(this.guid, SESSION_LOCK, 1,  (err, ret)=> {
+    this.redis.incr(this.uid, SESSION_LOCK, 1,  (err, ret)=> {
         if (err) {
             callback(err, ret);
         }
@@ -234,14 +234,14 @@ function session_result(callback){
 
 
 function session_unlock(){
-    if( !this.guid ){
+    if( !this.uid ){
         return false;
     }
     session_reset.call(this);
 };
 
 function session_aborted(callback){
-    if( !this.guid ){
+    if( !this.uid ){
         return false;
     }
     session_reset.call(this);
@@ -255,12 +255,12 @@ function session_reset(){
     if(this._locked){
         this._locked = 0;
         this._upsert = true;
-        this.redis.set(this.guid,SESSION_LOCK,0);
+        this.redis.set(this.uid,SESSION_LOCK,0);
     }
     let ttl = Date.now() - this.get(SESSION_TIME);
     if( this.opts.expire > 0 && ttl > (this.opts.expire / 10)*1000 ){
         this._upsert = true;
-        this.redis.expire(this.guid,this.opts.expire);
+        this.redis.expire(this.uid,this.opts.expire);
     }
     if(this._upsert){
         this._upsert = false;

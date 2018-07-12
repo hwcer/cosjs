@@ -121,19 +121,19 @@ function handle_finish(data,code){
 }
 
 
-function handle_callback(app,error,ret) {
-    let err;
+function handle_callback(app,error,result) {
+    let err,ret=result;
     if(error && (error instanceof Error) ){
         err = error.message;ret = process.env.NODE_ENV === "production" ? error.code : error.stack;
     }
     else {
-        err = error ? String(error) : null;
+        err = error ? error : null;
     }
-    if(err && Array.isArray(ret)){
-        ret = ret.join(",")
+    if(err && Array.isArray(result)){
+        ret = result.join(",")
     }
-    else if( err && typeof ret ==="object"){
-        ret = String(ret);
+    else if( err && typeof result ==="object"){
+        ret = String(result);
     }
 
     if(typeof app._event_finish === 'function'){
