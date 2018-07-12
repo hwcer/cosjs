@@ -1,7 +1,7 @@
 {
   "name": "cosjs",
   "description": "nodejs game server framework",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "main": "./index.js",
   "author": {
     "name": "wanchao.huang",
@@ -18,7 +18,7 @@
     "ioredis": "^3.2.2",
     "mongodb": "^3.0.1",
     "cosjs.loader": "*",
-    "cosjs.library": "^0.0.4",
+    "cosjs.library": "*",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.16.2"
