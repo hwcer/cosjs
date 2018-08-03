@@ -6,6 +6,7 @@
  *
  */
 "use strict";
+const onFinished            = require('on-finished')
 const cosjs_lib             = require('cosjs.library');
 const cosjs_redis           = cosjs_lib.require('redis').hash;
 const cosjs_format          = cosjs_lib.require('format').parse;
@@ -70,9 +71,9 @@ function session(handle,opts) {
             return callback(null,null);
         }
         //事件监听
-        let session_unlock_bind = session_unlock.bind(this);
-        handle.res.on('close',  session_unlock_bind);
-        handle.res.on('finish', session_unlock_bind);
+        onFinished(handle.res, (err, res)=>{
+            session_unlock.call(this);
+        })
 
         this.sid = handle.get(opts["key"],"string",opts["method"]);
         if( !this.sid ){
