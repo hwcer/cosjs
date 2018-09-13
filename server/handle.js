@@ -59,9 +59,9 @@ handle.prototype.binary= function (name, data) {
 
 handle.prototype.render = function(data,view){
     view = view || this.view || this.path;
-    let len = view.length;
+    let slen = view.length;
     let sub0 = view[0] === '/' ? 1 :0;
-    let sub1 = view[len-1] ==='/' ? (len - 1 - sub0) : (len - sub0);
+    let sub1 = view[slen-1] ==='/' ? (slen - 1 - sub0) : (slen - sub0);
     let path = view.substr(sub0,sub1);
     this.res.render(path,data,(err,ret)=>{
         if(err){
