@@ -3,29 +3,31 @@ const server = require('./server');
 
 exports.http = function http(opts){
     let app = server();
+    let httpServer = require('http').Server(app);
     if(opts['shell']){
-        shell.apply(app,arguments);
+        Array.prototype.push.call(arguments,httpServer);
+        call_apps_shell.apply(app,arguments);
     }
-    let port = opts['port'] || 80;
-    app.listen(port);
+    httpServer.listen(opts['port'] || 80);
 }
 
 exports.https = function https(opts){
     let app = server();
-    if(opts['shell']){
-        shell.apply(app,arguments);
-    }
     let fs = require('fs');
     let https = require('https');
-    let key  = fs.readFileSync(opts['key'], 'utf8');
-    let cert = fs.readFileSync(opts['cert'], 'utf8');
+
+    let key  = fs.readFileSync(opts['https']['key'], 'utf8');
+    let cert = fs.readFileSync(opts['https']['cert'], 'utf8');
     let credentials = {"key": key, "cert": cert};
     let httpsServer = https.createServer(credentials, app);
-    let port = opts['port'] || 443;
-    httpsServer.listen(port);
+    if(opts['shell']){
+        Array.prototype.push.call(arguments,httpsServer);
+        call_apps_shell.apply(app,arguments);
+    }
+    httpsServer.listen(opts['port'] || 443);
 }
 
-function shell(opts){
+function call_apps_shell(opts){
     let method = null;
     let handle = opts['shell'];
     if(typeof handle == 'function' ){

@@ -1,13 +1,13 @@
 {
   "name": "cosjs",
   "description": "nodejs game server framework",
-  "version": "4.3.5",
+  "version": "4.4.0",
   "main": "./index.js",
   "author": {
     "name": "wanchao.huang",
     "email": "hwclegend@163.com"
   },
-  "keywords": [ "game",  "server"],
+  "keywords": [ "http","https","game","cluster", "server"],
   "licenses": [
     {
       "type": "Apache License, Version 2.0",
@@ -15,17 +15,15 @@
     }
   ],
   "dependencies": {
-    "ioredis": "^3.2.2",
-    "mongodb": "^3.0.1",
+    "express": "^4.16.2",
+    "cosjs.redis": "*",
+    "cosjs.mongo": "*",
     "cosjs.loader": "*",
     "cosjs.library": "*",
-    "body-parser": "^1.18.2",
-    "cookie-parser": "^1.4.3",
-    "on-finished": "~2.3.0",
-    "express": "^4.16.2"
+    "cosjs.session": "*"
   },
   "engines": {
-    "node": "8.2+"
+    "node": "12.2+"
   },
   "directories": {
     "lib": "./lib/"

@@ -1,61 +1,80 @@
 ﻿"use strict";
-const cosjs_session         = require('./session');
 const cosjs_library         = require('cosjs.library');
+const cosjs_promise         = cosjs_library.require('promise');
+const cosjs_session         = require('cosjs.session');
 const cosjs_types           = {"get":["query"],"post":["body"],"cookie":["cookies"],"all":['params','query','body','cookies']};
 
 
-function handle(app,req,res){
+function handle(server,req,res){
     if (!(this instanceof handle)) {
-        return new handle(app,req,res);
+        return new handle(server,req,res);
     }
-    Object.defineProperty(this,'app',     { value: app, writable: false, enumerable: false, configurable: false, });
+    this.status = 0;
     Object.defineProperty(this,'req',     { value: req,  writable: false, enumerable: false, configurable: false, });
     Object.defineProperty(this,'res',     { value: res,  writable: false, enumerable: false, configurable: false, });
-    Object.defineProperty(this,'get',     { value: handle_getdata.bind(this,app), writable: false, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'path',    { value: handle_subpath.call(this), writable: false, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'output',  { value: app.option['output'] || 'html', writable: true, enumerable: true, configurable: false, });
-    Object.defineProperty(this,'callback',{ value: handle_callback.bind(this,app), writable: false, enumerable: true, configurable: false, });
-    if(app['_session_options']){
-        Object.defineProperty(this,'session',{ value: cosjs_session(this,app['_session_options']), writable: false, enumerable: true, configurable: false, });
-    }
-};
+    Object.defineProperty(this,'get',     { value: handle_getdata.bind(this,server), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'path',    { value: handle_subpath.call(this,server), writable: false, enumerable: true, configurable: false, });
+    Object.defineProperty(this,'output',  { value: server['option']['output'] || 'html', writable: true, enumerable: true, configurable: false, });
+    let _handle_session;
+    Object.defineProperty(this, "session", {
+        get:function () {
+            if( !_handle_session && server.session ){
+                _handle_session = cosjs_session(this,server.session);
+            }
+            return _handle_session;
+        }
+    });
+}
 
 module.exports = handle;
 
-handle.prototype.status = function(code){
-    this.res.status(code);
-    return this;
-}
-
+//中断操作
 handle.prototype.error = function(){
-    let err,ret;
-    if(arguments.length < 2){
-        err = 'error';ret = arguments[0] || 'unknown';
+    if( arguments[0] instanceof cosjs_promise.error || arguments[0] instanceof Error ){
+        return Promise.reject( arguments[0] );
     }
-    else if(arguments.length < 3){
-        err = arguments[0],ret = arguments[1];
+    let err,ret
+    if(arguments.length <= 1 && typeof arguments[0] !=='object'){
+        err='error';ret=arguments[0];
     }
     else {
         let arr = Array.from(arguments);
-        err = arr.shift(),ret = arr;
+        err=arr.shift();ret = arr.join(',');
     }
-    this.callback(err,ret);
-    return false;
-}
 
-handle.prototype.success = function(){
-    this.callback(null,arguments[0]);
-    return true;
+    return Promise.reject(cosjs_promise.error(err,ret));
+}
+//中断操作,等同于this.error(null,ret)
+handle.prototype.success = function(ret){
+    return Promise.reject(cosjs_promise.error(null,ret));
 }
 
 handle.prototype.binary= function (name, data) {
     let arr = name.split('.');
-    this.res.type(arr[1] || 'html');
+    this.output = arr[1] || 'txt'
     this.res.set("Content-Length", data.length);
-    let filename = encodeURI(arr[0]) + '.'+arr[1];
-    this.res.set("Content-Disposition", "attachment; filename=" + filename);
-    this.res.send(data);
+
+    let userAgent = (this.req.headers['user-agent']||'').toLowerCase();
+    if(userAgent.indexOf('msie') >= 0 || userAgent.indexOf('chrome') >= 0) {
+        this.res.set('Content-Disposition', 'attachment; filename=' + [encodeURIComponent(arr[0]),arr[1]].join('.') );
+    } else if(userAgent.indexOf('firefox') >= 0) {
+        this.res.set('Content-Disposition', `attachment; filename*="utf8 ${[encodeURIComponent(arr[0]),arr[1]].join('.')}"` );
+    } else {
+        //safari等其他非主流浏览器只能自求多福了
+        this.res.set('Content-Disposition', 'attachment; filename=' + [new Buffer(arr[0]).toString('binary'),arr[1]].join('.') );
+    }
+    return Promise.resolve(data);
 }
+
+handle.prototype.download = function (path) {
+    this.output = 'download';
+    return Promise.resolve(path);
+}
+handle.prototype.redirect = function(url){
+    this.output = 'redirect';
+    return Promise.resolve(url);
+}
+
 
 handle.prototype.render = function(data,view){
     view = view || this.view || this.path;
@@ -63,18 +82,14 @@ handle.prototype.render = function(data,view){
     let sub0 = view[0] === '/' ? 1 :0;
     let sub1 = view[slen-1] ==='/' ? (slen - 1 - sub0) : (slen - sub0);
     let path = view.substr(sub0,sub1);
-    this.res.render(path,data,(err,ret)=>{
-        if(err){
-            this.res.end(err.message || err.stack || err.toString() );
-        }
-        else{
-            this.res.end(ret);
-        }
-    });
+    this.output = 'html';
+    return this.promise.call(this.res,"render",path,data);
 }
 
-handle.prototype.redirect = function(url){
-    this.res.redirect(url);
+
+/////////////////////////////////////promise框架///////////////////////////////////
+handle.prototype.promise = function(){
+    return cosjs_promise.apply(this,arguments);
 }
 //获取参数
 function handle_getdata(server, key, type, method) {
@@ -88,65 +103,14 @@ function handle_getdata(server, key, type, method) {
             break;
         }
     }
-    if ( v!==null && type) {
+    if (type) {
         v = cosjs_library('format/parse',v, type);
     }
     return v;
-};
-
-
-function handle_finish(data,code){
-    if(this.res.finished){
-        return ;
-    }
-    if(code){
-        this.res.status(code);
-    }
-    let output = this.output;
-    if(output ==='view'){
-        return this.render(data);
-    }
-    this.res.type(output);
-    if(output === 'jsonp'){
-        this.res.jsonp(data);
-    }
-    else{
-        this.res.send(data);
-    }
-    this.res.end();
-
-    if(this.debug){
-        console.log("debug:",this.path,code,JSON.stringify(data))
-    }
 }
 
-
-function handle_callback(app,error,result) {
-    let err,ret=result;
-    if(error && (error instanceof Error) ){
-        err = error.message;ret = process.env.NODE_ENV === "production" ? error.code : error.stack;
-    }
-    else {
-        err = error ? error : null;
-    }
-    if(err && Array.isArray(result)){
-        ret = result.join(",")
-    }
-    else if( err && typeof result ==="object"){
-        ret = String(result);
-    }
-
-    if(typeof app._event_finish === 'function'){
-        app._event_finish.call(this,err,ret,handle_finish.bind(this));
-    }
-    else{
-        var data = {"err":err,"ret":ret||''};
-        handle_finish.call(this,data);
-    }
-}
-
-function handle_subpath(){
-    let path,subpath = this.app.subpath;
+function handle_subpath(server){
+    let path,subpath = server.subpath;
     if(typeof subpath === 'function'){
         path = subpath.call(this);
     }
